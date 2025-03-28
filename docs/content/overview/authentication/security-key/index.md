@@ -22,13 +22,13 @@ __Authelia__ supports hardware-based second factors leveraging [FIDO2] [WebAuthn
 Security keys are among the most secure second factor. This method is already supported by many major applications and
 platforms like Google, Facebook, GitHub, some banks, and much more.
 
-{{< figure src="yubikey.jpg" caption="A YubiKey Security Key" alt="A YubiKey Security Key" width=150 >}}
+{{< figure src="yubikey.jpg" caption="A YubiKey Security Key" alt="A YubiKey Security Key" width=150 process="resize 150x" >}}
 
 Normally, the protocol requires your security key to be enrolled on each site before being able to authenticate with it.
 Since Authelia provides Single Sign-On, your users will need to enroll their device only once to get access to all your
 applications.
 
-{{< figure src="REGISTER-U2F.png" caption="The WebAuthn Registration View" alt="2FA WebAuthn Registration View" width=400 >}}
+{{< figure src="REGISTER-U2F.png" caption="The WebAuthn Registration View" alt="2FA WebAuthn Registration View" process="resize 400x" >}}
 
 After having successfully passed the first factor, select *Security Key* method and click on *Register device* link.
 This will send you an email to verify your identity.
@@ -41,7 +41,7 @@ complete the enrollment.
 Upon successful enrollment, you can authenticate using your security key by simply touching the token again when
 requested:
 
-{{< figure src="2FA-U2F.png" caption="The WebAuthn Authentication View" alt="2FA WebAuthn Authentication View" width=400 >}}
+{{< figure src="2FA-U2F.png" caption="The WebAuthn Authentication View" alt="2FA WebAuthn Authentication View" process="resize 400x" >}}
 
 Easy, right?!
 
@@ -50,11 +50,27 @@ Easy, right?!
 ### Can I register multiple FIDO2 WebAuthn credentials?
 
 Yes, as of v4.38.0 and above Authelia supports registering multiple WebAuthn credentials as per the
-[roadmap](../../../roadmap/active/webauthn.md#multi-device-registration).
+[roadmap](../../../roadmap/complete/webauthn.md#multi-device-registration).
 
 ### Can I perform a passwordless login?
 
-Not at this time. We will tackle this at a later date as per the [roadmap](../../../roadmap/active/webauthn.md#passwordless-login).
+Yes, as of v4.39.0 and above Authelia supports passwordless logins via Passkeys as per the
+[roadmap](../../../roadmap/complete/webauthn.md#passwordless-login).
+
+{{< figure src="passkeys.png" caption="The Passkey Authentication Portal View" alt="The Passkey Authentication Portal View" width=400 process="resize 400x" >}}
+
+### Why does it ask me for my password after using a Passkey to login?
+
+This exists to ensure the `two_factor` policy is enforced. The Passkey itself is a single factor and we do have plans to
+offer very [granular control policies and their requirements](../../../roadmap/active/granular-authorization.md). For
+example it will likely be possible to create your own custom policy equal to `two_factor` today which also considers a
+single Passkey login as satisfactory for a particular access control policy.
+
+{{< figure src="password_2fa.png" caption="The Passkey MFA Password Authentication Portal View" alt="The Passkey MFA Password Authentication Portal View" width=400 process="resize 400x" >}}
+
+In the meantime the [configuration](../../../configuration/second-factor/webauthn.md) has an experimental option to
+allow Passkey authenticators which support user verification, that perform user verification, and that report they
+performed user verification; to count as satisfying `two_factor`.
 
 ### Why don't I have access to the *Security Key* option?
 

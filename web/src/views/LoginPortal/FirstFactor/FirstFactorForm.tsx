@@ -1,13 +1,22 @@
-import React, { MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { Alert, AlertTitle, Button, Checkbox, FormControl, FormControlLabel, Link, Theme } from "@mui/material";
+import {
+    Alert,
+    AlertTitle,
+    Button,
+    Checkbox,
+    CircularProgress,
+    FormControl,
+    FormControlLabel,
+    Link,
+    Theme,
+} from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import TextField from "@mui/material/TextField";
-import makeStyles from "@mui/styles/makeStyles";
 import { BroadcastChannel } from "broadcast-channel";
-import classnames from "classnames";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
+import { makeStyles } from "tss-react/mui";
 
 import { ResetPasswordStep1Route } from "@constants/Routes";
 import { RedirectionURL, RequestMethod } from "@constants/SearchParams";
@@ -16,28 +25,30 @@ import { useQueryParam } from "@hooks/QueryParam";
 import { useWorkflow } from "@hooks/Workflow";
 import LoginLayout from "@layouts/LoginLayout";
 import { IsCapsLockModified } from "@services/CapsLock";
-import { postFirstFactor } from "@services/FirstFactor";
+import { postFirstFactor } from "@services/Password";
+import PasskeyForm from "@views/LoginPortal/FirstFactor/PasskeyForm";
 
 export interface Props {
     disabled: boolean;
+    passkeyLogin: boolean;
     rememberMe: boolean;
-
     resetPassword: boolean;
     resetPasswordCustomURL: string;
 
     onAuthenticationStart: () => void;
-    onAuthenticationFailure: () => void;
+    onAuthenticationStop: () => void;
     onAuthenticationSuccess: (redirectURL: string | undefined) => void;
     onChannelStateChange: () => void;
 }
 
 const FirstFactorForm = function (props: Props) {
     const { t: translate } = useTranslation();
+    const { classes, cx } = useStyles();
 
     const navigate = useNavigate();
     const redirectionURL = useQueryParam(RedirectionURL);
     const requestMethod = useQueryParam(RequestMethod);
-    const [workflow] = useWorkflow();
+    const [workflow, workflowID] = useWorkflow();
     const { createErrorNotification } = useNotifications();
 
     const loginChannel = useMemo(() => new BroadcastChannel<boolean>("login"), []);
@@ -49,16 +60,27 @@ const FirstFactorForm = function (props: Props) {
     const [passwordCapsLock, setPasswordCapsLock] = useState(false);
     const [passwordCapsLockPartial, setPasswordCapsLockPartial] = useState(false);
     const [passwordError, setPasswordError] = useState(false);
+    const [loading, setLoading] = useState(false);
 
-    const usernameRef = useRef() as MutableRefObject<HTMLInputElement>;
-    const passwordRef = useRef() as MutableRefObject<HTMLInputElement>;
+    const usernameRef = useRef<HTMLInputElement | null>(null);
+    const passwordRef = useRef<HTMLInputElement | null>(null);
 
-    const styles = useStyles();
+    const focusUsername = useCallback(() => {
+        if (usernameRef.current === null) return;
+
+        usernameRef.current.focus();
+    }, [usernameRef]);
+
+    const focusPassword = useCallback(() => {
+        if (passwordRef.current === null) return;
+
+        passwordRef.current.focus();
+    }, [passwordRef]);
 
     useEffect(() => {
-        const timeout = setTimeout(() => usernameRef.current.focus(), 10);
+        const timeout = setTimeout(() => focusUsername(), 10);
         return () => clearTimeout(timeout);
-    }, [usernameRef]);
+    }, [focusUsername]);
 
     useEffect(() => {
         loginChannel.addEventListener("message", (authenticated) => {
@@ -86,20 +108,36 @@ const FirstFactorForm = function (props: Props) {
             return;
         }
 
+        setLoading(true);
+
         props.onAuthenticationStart();
+
         try {
-            const res = await postFirstFactor(username, password, rememberMe, redirectionURL, requestMethod, workflow);
+            const res = await postFirstFactor(
+                username,
+                password,
+                rememberMe,
+                redirectionURL,
+                requestMethod,
+                workflow,
+                workflowID,
+            );
+
+            setLoading(false);
+
             await loginChannel.postMessage(true);
             props.onAuthenticationSuccess(res ? res.redirect : undefined);
         } catch (err) {
             console.error(err);
             createErrorNotification(translate("Incorrect username or password"));
-            props.onAuthenticationFailure();
+            setLoading(false);
+            props.onAuthenticationStop();
             setPassword("");
-            passwordRef.current.focus();
+            focusPassword();
         }
     }, [
         createErrorNotification,
+        focusPassword,
         loginChannel,
         password,
         props,
@@ -109,6 +147,7 @@ const FirstFactorForm = function (props: Props) {
         translate,
         username,
         workflow,
+        workflowID,
     ]);
 
     const handleResetPasswordClick = () => {
@@ -130,26 +169,26 @@ const FirstFactorForm = function (props: Props) {
                     handleSignIn().catch(console.error);
                 } else {
                     setUsernameError(false);
-                    passwordRef.current.focus();
+                    focusPassword();
                 }
             }
         },
-        [handleSignIn, password.length, username.length],
+        [focusPassword, handleSignIn, password.length, username.length],
     );
 
     const handlePasswordKeyDown = useCallback(
         (event: React.KeyboardEvent<HTMLDivElement>) => {
             if (event.key === "Enter") {
                 if (!username.length) {
-                    usernameRef.current.focus();
+                    focusUsername();
                 } else if (!password.length) {
-                    passwordRef.current.focus();
+                    focusPassword();
                 }
                 handleSignIn().catch(console.error);
                 event.preventDefault();
             }
         },
-        [handleSignIn, password.length, username.length],
+        [focusPassword, focusUsername, handleSignIn, password.length, username.length],
     );
 
     const handlePasswordKeyUp = useCallback(
@@ -180,14 +219,14 @@ const FirstFactorForm = function (props: Props) {
         (event: React.KeyboardEvent<HTMLButtonElement>) => {
             if (event.key === "Enter") {
                 if (!username.length) {
-                    usernameRef.current.focus();
+                    focusUsername();
                 } else if (!password.length) {
-                    passwordRef.current.focus();
+                    focusPassword();
                 }
                 handleSignIn().catch(console.error);
             }
         },
-        [handleSignIn, password.length, username.length],
+        [focusPassword, focusUsername, handleSignIn, password.length, username.length],
     );
 
     return (
@@ -242,7 +281,7 @@ const FirstFactorForm = function (props: Props) {
                         </Grid>
                     ) : null}
                     {props.rememberMe ? (
-                        <Grid size={{ xs: 12 }} className={classnames(styles.actionRow)}>
+                        <Grid size={{ xs: 12 }} className={cx(classes.actionRow)}>
                             <FormControlLabel
                                 control={
                                     <Checkbox
@@ -255,7 +294,7 @@ const FirstFactorForm = function (props: Props) {
                                         color="primary"
                                     />
                                 }
-                                className={styles.rememberMe}
+                                className={classes.rememberMe}
                                 label={translate("Remember me")}
                             />
                         </Grid>
@@ -268,17 +307,32 @@ const FirstFactorForm = function (props: Props) {
                             fullWidth
                             disabled={disabled}
                             onClick={handleSignIn}
+                            endIcon={loading ? <CircularProgress size={20} /> : null}
                         >
                             {translate("Sign in")}
                         </Button>
                     </Grid>
+                    {props.passkeyLogin ? (
+                        <PasskeyForm
+                            disabled={props.disabled}
+                            rememberMe={props.rememberMe}
+                            onAuthenticationError={(err) => createErrorNotification(err.message)}
+                            onAuthenticationStart={() => {
+                                setUsername("");
+                                setPassword("");
+                                props.onAuthenticationStart();
+                            }}
+                            onAuthenticationStop={props.onAuthenticationStop}
+                            onAuthenticationSuccess={props.onAuthenticationSuccess}
+                        />
+                    ) : null}
                     {props.resetPassword ? (
-                        <Grid size={{ xs: 12 }} className={classnames(styles.actionRow, styles.flexEnd)}>
+                        <Grid size={{ xs: 12 }} className={cx(classes.actionRow, classes.flexEnd)}>
                             <Link
                                 id="reset-password-button"
                                 component="button"
                                 onClick={handleResetPasswordClick}
-                                className={styles.resetLink}
+                                className={classes.resetLink}
                                 underline="hover"
                             >
                                 {translate("Reset password?")}
@@ -291,7 +345,7 @@ const FirstFactorForm = function (props: Props) {
     );
 };
 
-const useStyles = makeStyles((theme: Theme) => ({
+const useStyles = makeStyles()((theme: Theme) => ({
     actionRow: {
         display: "flex",
         flexDirection: "row",

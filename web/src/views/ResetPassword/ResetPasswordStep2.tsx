@@ -4,10 +4,9 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { Button, FormControl, IconButton, InputAdornment, Theme } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import TextField from "@mui/material/TextField";
-import makeStyles from "@mui/styles/makeStyles";
-import classnames from "classnames";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
+import { makeStyles } from "tss-react/mui";
 
 import PasswordMeter from "@components/PasswordMeter";
 import { IndexRoute } from "@constants/Routes";
@@ -20,14 +19,15 @@ import { getPasswordPolicyConfiguration } from "@services/PasswordPolicyConfigur
 import { completeResetPasswordProcess, resetPassword } from "@services/ResetPassword";
 
 const ResetPasswordStep2 = function () {
-    const styles = useStyles();
+    const { t: translate } = useTranslation();
+    const { classes, cx } = useStyles();
+
     const [formDisabled, setFormDisabled] = useState(true);
     const [password1, setPassword1] = useState("");
     const [password2, setPassword2] = useState("");
     const [errorPassword1, setErrorPassword1] = useState(false);
     const [errorPassword2, setErrorPassword2] = useState(false);
     const { createSuccessNotification, createErrorNotification } = useNotifications();
-    const { t: translate } = useTranslation();
     const navigate = useNavigate();
     const [showPassword, setShowPassword] = useState(false);
 
@@ -46,7 +46,14 @@ const ResetPasswordStep2 = function () {
     // the secret for OTP.
     const processToken = useQueryParam(IdentityToken);
 
-    const completeProcess = useCallback(async () => {
+    const handleRateLimited = useCallback(
+        (retryAfter: number) => {
+            createErrorNotification(translate("You have made too many requests"));
+        },
+        [createErrorNotification, translate],
+    );
+
+    const handleSubmitReset = useCallback(async () => {
         if (!processToken) {
             setFormDisabled(true);
             createErrorNotification(translate("No verification token provided"));
@@ -55,7 +62,15 @@ const ResetPasswordStep2 = function () {
 
         try {
             setFormDisabled(true);
-            await completeResetPasswordProcess(processToken);
+
+            const response = await completeResetPasswordProcess(processToken);
+
+            if (response && response.limited) {
+                handleRateLimited(response.retryAfter);
+
+                return;
+            }
+
             const policy = await getPasswordPolicyConfiguration();
             setPPolicy(policy);
             setFormDisabled(false);
@@ -66,13 +81,16 @@ const ResetPasswordStep2 = function () {
             );
             setFormDisabled(true);
         }
-    }, [processToken, createErrorNotification, translate]);
+    }, [processToken, createErrorNotification, translate, handleRateLimited]);
 
     useEffect(() => {
-        completeProcess();
-    }, [completeProcess]);
+        handleSubmitReset();
+    }, [handleSubmitReset]);
 
     const doResetPassword = async () => {
+        setPassword1("");
+        setPassword2("");
+
         if (password1 === "" || password2 === "") {
             if (password1 === "") {
                 setErrorPassword1(true);
@@ -82,6 +100,7 @@ const ResetPasswordStep2 = function () {
             }
             return;
         }
+
         if (password1 !== password2) {
             setErrorPassword1(true);
             setErrorPassword2(true);
@@ -89,11 +108,13 @@ const ResetPasswordStep2 = function () {
             return;
         }
 
+        setFormDisabled(true);
+
         try {
             await resetPassword(password1);
+
             createSuccessNotification(translate("Password has been reset"));
             setTimeout(() => navigate(IndexRoute), 1500);
-            setFormDisabled(true);
         } catch (err) {
             console.error(err);
             if ((err as Error).message.includes("0000052D.")) {
@@ -117,7 +138,7 @@ const ResetPasswordStep2 = function () {
     return (
         <MinimalLayout title={translate("Enter new password")} id="reset-password-step2-stage">
             <FormControl id={"form-reset-password"}>
-                <Grid container className={styles.root} spacing={2}>
+                <Grid container className={classes.root} spacing={2}>
                     <Grid size={{ xs: 12 }}>
                         <TextField
                             id="password1-textfield"
@@ -128,7 +149,7 @@ const ResetPasswordStep2 = function () {
                             disabled={formDisabled}
                             onChange={(e) => setPassword1(e.target.value)}
                             error={errorPassword1}
-                            className={classnames(styles.fullWidth)}
+                            className={cx(classes.fullWidth)}
                             autoComplete="new-password"
                             InputProps={{
                                 endAdornment: (
@@ -165,7 +186,7 @@ const ResetPasswordStep2 = function () {
                                     ev.preventDefault();
                                 }
                             }}
-                            className={classnames(styles.fullWidth)}
+                            className={cx(classes.fullWidth)}
                             autoComplete="new-password"
                         />
                     </Grid>
@@ -177,7 +198,7 @@ const ResetPasswordStep2 = function () {
                             name="password1"
                             disabled={formDisabled}
                             onClick={handleResetClick}
-                            className={styles.fullWidth}
+                            className={classes.fullWidth}
                         >
                             {translate("Reset")}
                         </Button>
@@ -189,7 +210,7 @@ const ResetPasswordStep2 = function () {
                             color="primary"
                             name="password2"
                             onClick={handleCancelClick}
-                            className={styles.fullWidth}
+                            className={classes.fullWidth}
                         >
                             {translate("Cancel")}
                         </Button>
@@ -200,9 +221,7 @@ const ResetPasswordStep2 = function () {
     );
 };
 
-export default ResetPasswordStep2;
-
-const useStyles = makeStyles((theme: Theme) => ({
+const useStyles = makeStyles()((theme: Theme) => ({
     root: {
         marginTop: theme.spacing(2),
         marginBottom: theme.spacing(2),
@@ -211,3 +230,5 @@ const useStyles = makeStyles((theme: Theme) => ({
         width: "100%",
     },
 }));
+
+export default ResetPasswordStep2;

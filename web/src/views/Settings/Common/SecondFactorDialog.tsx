@@ -16,15 +16,16 @@ import {
     Theme,
     Typography,
 } from "@mui/material";
-import makeStyles from "@mui/styles/makeStyles";
 import { browserSupportsWebAuthn } from "@simplewebauthn/browser";
 import { useTranslation } from "react-i18next";
+import { makeStyles } from "tss-react/mui";
 
 import SuccessIcon from "@components/SuccessIcon";
 import { SecondFactorMethod } from "@models/Methods";
 import { UserInfo } from "@models/UserInfo";
 import { UserSessionElevation } from "@services/UserSessionElevation";
 import LoadingPage from "@views/LoadingPage/LoadingPage";
+import PasswordForm from "@views/LoginPortal/SecondFactor/PasswordForm";
 
 const SecondFactorMethodMobilePush = lazy(() => import("@views/Settings/Common/SecondFactorMethodMobilePush"));
 const SecondFactorMethodOneTimePassword = lazy(
@@ -42,7 +43,7 @@ type Props = {
 
 const SecondFactorDialog = function (props: Props) {
     const { t: translate } = useTranslation("settings");
-    const styles = useStyles();
+    const { classes } = useStyles();
 
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -87,6 +88,10 @@ const SecondFactorDialog = function (props: Props) {
         if (!open) {
             props.handleOpened();
             setOpen(true);
+        }
+
+        if (!props.elevation.factor_knowledge) {
+            setActiveStep(1);
         }
     }, [closing, handleClose, open, props]);
 
@@ -149,7 +154,7 @@ const SecondFactorDialog = function (props: Props) {
                 {!props.elevation || !props.info ? (
                     activeStep === 2 ? (
                         <Box
-                            className={styles.success}
+                            className={classes.success}
                             sx={{
                                 display: "flex",
                                 flexDirection: "column",
@@ -193,7 +198,9 @@ const SecondFactorDialog = function (props: Props) {
                     </Stack>
                 ) : activeStep === 1 ? (
                     <Stack alignContent={"center"} justifyContent={"center"} alignItems={"center"} my={8}>
-                        {method === SecondFactorMethod.WebAuthn ? (
+                        {!props.elevation.factor_knowledge ? (
+                            <PasswordForm onAuthenticationSuccess={handleSuccess} />
+                        ) : method === SecondFactorMethod.WebAuthn ? (
                             <SecondFactorMethodWebAuthn onSecondFactorSuccess={handleSuccess} closing={closing} />
                         ) : method === SecondFactorMethod.TOTP ? (
                             <SecondFactorMethodOneTimePassword
@@ -206,7 +213,7 @@ const SecondFactorDialog = function (props: Props) {
                     </Stack>
                 ) : (
                     <Box
-                        className={styles.success}
+                        className={classes.success}
                         sx={{
                             display: "flex",
                             flexDirection: "column",
@@ -228,9 +235,7 @@ const SecondFactorDialog = function (props: Props) {
     );
 };
 
-export default SecondFactorDialog;
-
-const useStyles = makeStyles((theme: Theme) => ({
+const useStyles = makeStyles()((theme: Theme) => ({
     success: {
         marginBottom: theme.spacing(2),
         flex: "0 0 100%",
@@ -241,3 +246,5 @@ const useStyles = makeStyles((theme: Theme) => ({
         marginY: "2.5rem",
     },
 }));
+
+export default SecondFactorDialog;

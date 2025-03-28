@@ -1,18 +1,12 @@
-import React, { Fragment, useCallback, useEffect, useState } from "react";
+import React, { Fragment, useCallback, useEffect, useRef, useState } from "react";
 
 import { useTranslation } from "react-i18next";
 
+import { useNotifications } from "@hooks/NotificationsContext";
 import { useUserInfoTOTPConfiguration } from "@hooks/UserInfoTOTPConfiguration";
 import { completeTOTPSignIn } from "@services/OneTimePassword";
 import LoadingPage from "@views/LoadingPage/LoadingPage";
-import OTPDial from "@views/LoginPortal/SecondFactor/OTPDial";
-
-export enum State {
-    Idle = 1,
-    InProgress = 2,
-    Success = 3,
-    Failure = 4,
-}
+import OTPDial, { State } from "@views/LoginPortal/SecondFactor/OTPDial";
 
 export interface Props {
     closing: boolean;
@@ -24,8 +18,17 @@ const SecondFactorMethodOneTimePassword = function (props: Props) {
 
     const [passcode, setPasscode] = useState("");
     const [state, setState] = useState(State.Idle);
+    const { createErrorNotification } = useNotifications();
 
     const [config, fetchConfig, , fetchConfigError] = useUserInfoTOTPConfiguration();
+
+    const timeoutRateLimit = useRef<NodeJS.Timeout | null>(null);
+
+    useEffect(() => {
+        if (timeoutRateLimit.current === null) return;
+
+        return clearTimeout(timeoutRateLimit.current);
+    }, []);
 
     useEffect(() => {
         if (fetchConfigError) {
@@ -37,6 +40,24 @@ const SecondFactorMethodOneTimePassword = function (props: Props) {
     useEffect(() => {
         fetchConfig();
     }, [fetchConfig]);
+
+    const handleRateLimited = useCallback(
+        (retryAfter: number) => {
+            if (timeoutRateLimit.current) {
+                clearTimeout(timeoutRateLimit.current);
+            }
+
+            setState(State.RateLimited);
+
+            createErrorNotification(translate("You have made too many requests"));
+
+            timeoutRateLimit.current = setTimeout(() => {
+                setState(State.Idle);
+                timeoutRateLimit.current = null;
+            }, retryAfter * 1000);
+        },
+        [createErrorNotification, translate],
+    );
 
     const handleSignIn = useCallback(async () => {
         const passcodeStr = `${passcode}`;
@@ -50,17 +71,25 @@ const SecondFactorMethodOneTimePassword = function (props: Props) {
         try {
             setState(State.InProgress);
 
-            await completeTOTPSignIn(passcodeStr);
+            const res = await completeTOTPSignIn(passcodeStr);
 
-            setState(State.Success);
-            props.onSecondFactorSuccess();
+            if (res) {
+                if (!res.limited) {
+                    setState(State.Success);
+                } else {
+                    handleRateLimited(res.retryAfter);
+                }
+            } else {
+                createErrorNotification(translate("The One-Time Password might be wrong"));
+                setState(State.Failure);
+            }
         } catch (err) {
             console.error(err);
             setState(State.Failure);
         }
 
         setPasscode("");
-    }, [passcode, config, props]);
+    }, [passcode, config, handleRateLimited, createErrorNotification, translate]);
 
     useEffect(() => {
         handleSignIn().catch(console.error);

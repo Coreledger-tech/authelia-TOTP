@@ -47,8 +47,16 @@ and ingress configurations.
 Here is what Authelia's portal looks like:
 
 <p align="center">
-  <img src="https://www.authelia.com/images/1FA.png" width="400" />
-  <img src="https://www.authelia.com/images/2FA-METHODS.png" width="400" />
+    <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://www.authelia.com/images/dark.png" width="400">
+    <source media="(prefers-color-scheme: light)" srcset="https://www.authelia.com/images/light.png" width="400">
+    <img src="https://www.authelia.com/images/light.png" width="400">
+  </picture>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://www.authelia.com/images/2fa-methods-dark.png" width="400">
+    <source media="(prefers-color-scheme: light)" srcset="https://www.authelia.com/images/2fa-methods-light.png" width="400">
+    <img src="https://www.authelia.com/images/2fa-methods-light.png" width="400">
+  </picture>
 </p>
 
 ## Features summary
@@ -62,6 +70,7 @@ This is a list of the key features of Authelia:
     with compatible authenticator applications.
   * **[Mobile Push Notifications](https://www.authelia.com/overview/authentication/push-notification/)**
     with [Duo](https://duo.com/).
+* Passwordless Authentication via WebAuthn (Passkeys)
 * Password reset with identity verification using email confirmation.
 * Access restriction after too many invalid authentication attempts.
 * Fine-grained access control using rules which match criteria like subdomain, user, user group membership, request uri,
@@ -106,9 +115,9 @@ Authelia works in combination with [nginx], [Traefik], [Caddy], [Skipper], [Envo
 See the [Get Started Guide](https://www.authelia.com/integration/prologue/get-started/) or one of the curated examples
 below.
 
-### docker-compose
+### docker compose
 
-The `docker-compose` bundles act as a starting point for anyone wanting to see Authelia in action. You will have to
+The `docker compose` bundles act as a starting point for anyone wanting to see Authelia in action. You will have to
 customize them to your needs as they come with self-signed certificates.
 
 #### [Local](https://www.authelia.com/integration/deployment/docker/#local)
@@ -326,6 +335,12 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     </tr>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/samos667"><img src="https://avatars.githubusercontent.com/u/50653464?v=4?s=100" width="100px;" alt="samos667"/><br /><sub><b>samos667</b></sub></a><br /><a href="https://github.com/authelia/authelia/commits?author=samos667" title="Documentation">📖</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/0xSysR3ll"><img src="https://avatars.githubusercontent.com/u/31414959?v=4?s=100" width="100px;" alt="0xsysr3ll"/><br /><sub><b>0xsysr3ll</b></sub></a><br /><a href="https://github.com/authelia/authelia/commits?author=0xSysR3ll" title="Documentation">📖</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/cromelex"><img src="https://avatars.githubusercontent.com/u/96779452?v=4?s=100" width="100px;" alt="Dan"/><br /><sub><b>Dan</b></sub></a><br /><a href="https://github.com/authelia/authelia/commits?author=cromelex" title="Documentation">📖</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="http://shaamallow.com"><img src="https://avatars.githubusercontent.com/u/39766320?v=4?s=100" width="100px;" alt="Eyal Benaroche"/><br /><sub><b>Eyal Benaroche</b></sub></a><br /><a href="https://github.com/authelia/authelia/commits?author=Shaamallow" title="Documentation">📖</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/wangweixuan"><img src="https://avatars.githubusercontent.com/u/24620923?v=4?s=100" width="100px;" alt="Wang Weixuan"/><br /><sub><b>Wang Weixuan</b></sub></a><br /><a href="https://github.com/authelia/authelia/issues?q=author%3Awangweixuan" title="Bug reports">🐛</a> <a href="https://github.com/authelia/authelia/commits?author=wangweixuan" title="Code">💻</a> <a href="https://github.com/authelia/authelia/commits?author=wangweixuan" title="Tests">⚠️</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://t.me/daniw1337"><img src="https://avatars.githubusercontent.com/u/21097466?v=4?s=100" width="100px;" alt="Dani"/><br /><sub><b>Dani</b></sub></a><br /><a href="https://github.com/authelia/authelia/commits?author=DaniW42" title="Documentation">📖</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://lhns.de"><img src="https://avatars.githubusercontent.com/u/1524059?v=4?s=100" width="100px;" alt="Pierre Kisters"/><br /><sub><b>Pierre Kisters</b></sub></a><br /><a href="https://github.com/authelia/authelia/commits?author=lhns" title="Code">💻</a> <a href="https://github.com/authelia/authelia/issues?q=author%3Alhns" title="Bug reports">🐛</a> <a href="https://github.com/authelia/authelia/commits?author=lhns" title="Tests">⚠️</a></td>
     </tr>
   </tbody>
 </table>
@@ -375,7 +390,8 @@ which are both [Microsoft](https://www.microsoft.com/?from=Authelia) products.
 #### Backers
 
 Thank you to all our backers! 🙏 [Become a backer](https://opencollective.com/authelia-sponsors/contribute) and help us
-sustain our community. The money we currently receive is dedicated to bootstrap a bug bounty program to give us as many
+sustain our community. The money we currently receive is dedicated to fund a security audit, and potentially in the
+future introducing a bug bounty program to give us as many
 eyes as we can to detect potential vulnerabilities.
 <a href="https://opencollective.com/authelia-sponsors#backers"><img src="https://opencollective.com/authelia-sponsors/backers.svg?width=890"></a>
 

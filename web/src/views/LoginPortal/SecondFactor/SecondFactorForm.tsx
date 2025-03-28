@@ -2,12 +2,13 @@ import React, { lazy, useEffect, useState } from "react";
 
 import { Box, Button, Theme } from "@mui/material";
 import Grid from "@mui/material/Grid2";
-import makeStyles from "@mui/styles/makeStyles";
 import { browserSupportsWebAuthn } from "@simplewebauthn/browser";
 import { useTranslation } from "react-i18next";
 import { Route, Routes, useNavigate } from "react-router-dom";
+import { makeStyles } from "tss-react/mui";
 
 import {
+    SecondFactorPasswordSubRoute,
     SecondFactorPushSubRoute,
     SecondFactorTOTPSubRoute,
     SecondFactorWebAuthnSubRoute,
@@ -28,9 +29,11 @@ import MethodSelectionDialog from "@views/LoginPortal/SecondFactor/MethodSelecti
 const OneTimePasswordMethod = lazy(() => import("@views/LoginPortal/SecondFactor/OneTimePasswordMethod"));
 const PushNotificationMethod = lazy(() => import("@views/LoginPortal/SecondFactor/PushNotificationMethod"));
 const WebAuthnMethod = lazy(() => import("@views/LoginPortal/SecondFactor/WebAuthnMethod"));
+const PasswordMethod = lazy(() => import("@views/LoginPortal/SecondFactor/PasswordMethod"));
 
 export interface Props {
     authenticationLevel: AuthenticationLevel;
+    factorKnowledge: boolean;
     userInfo: UserInfo;
     configuration: Configuration;
     duoSelfEnrollment: boolean;
@@ -40,13 +43,14 @@ export interface Props {
 }
 
 const SecondFactorForm = function (props: Props) {
-    const styles = useStyles();
+    const { t: translate } = useTranslation();
+    const { classes } = useStyles();
+
     const navigate = useNavigate();
     const [methodSelectionOpen, setMethodSelectionOpen] = useState(false);
     const [stateWebAuthnSupported, setStateWebAuthnSupported] = useState(false);
     const { createErrorNotification } = useNotifications();
     const { setLocalStorageMethod, localStorageMethodAvailable } = useLocalStorageMethodContext();
-    const { t: translate } = useTranslation();
 
     useEffect(() => {
         setStateWebAuthnSupported(browserSupportsWebAuthn());
@@ -80,13 +84,15 @@ const SecondFactorForm = function (props: Props) {
         navigate(SignOutRoute);
     };
 
+    const showMethods = props.factorKnowledge && props.configuration.available_methods.size > 1;
+
     return (
         <LoginLayout
             id={"second-factor-stage"}
             title={`${translate("Hi")} ${props.userInfo.display_name}`}
             userInfo={props.userInfo}
         >
-            {props.configuration.available_methods.size > 1 ? (
+            {showMethods ? (
                 <MethodSelectionDialog
                     open={methodSelectionOpen}
                     methods={props.configuration.available_methods}
@@ -100,15 +106,26 @@ const SecondFactorForm = function (props: Props) {
                     <Button id={"logout-button"} color={"secondary"} onClick={handleLogoutClick}>
                         {translate("Logout")}
                     </Button>
-                    {props.configuration.available_methods.size > 1 ? " | " : null}
-                    {props.configuration.available_methods.size > 1 ? (
-                        <Button id={"methods-button"} color={"secondary"} onClick={handleMethodSelectionClick}>
+                    {showMethods ? " | " : null}
+                    {showMethods ? (
+                        <Button id={"methods-button"} color="secondary" onClick={handleMethodSelectionClick}>
                             {translate("Methods")}
                         </Button>
                     ) : null}
                 </Grid>
-                <Box className={styles.methodContainer}>
+                <Box className={classes.methodContainer}>
                     <Routes>
+                        <Route
+                            path={SecondFactorPasswordSubRoute}
+                            element={
+                                <PasswordMethod
+                                    id="password-method"
+                                    authenticationLevel={props.authenticationLevel}
+                                    userInfo={props.userInfo}
+                                    onAuthenticationSuccess={props.onAuthenticationSuccess}
+                                />
+                            }
+                        />
                         <Route
                             path={SecondFactorTOTPSubRoute}
                             element={
@@ -162,9 +179,7 @@ const SecondFactorForm = function (props: Props) {
     );
 };
 
-export default SecondFactorForm;
-
-const useStyles = makeStyles((theme: Theme) => ({
+const useStyles = makeStyles()((theme: Theme) => ({
     methodContainer: {
         border: "1px solid #d6d6d6",
         borderRadius: "10px",
@@ -174,3 +189,5 @@ const useStyles = makeStyles((theme: Theme) => ({
         minWidth: "300px",
     },
 }));
+
+export default SecondFactorForm;

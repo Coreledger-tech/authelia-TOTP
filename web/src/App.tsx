@@ -1,9 +1,8 @@
 import React, { Suspense, lazy, useState } from "react";
 
-import createCache from "@emotion/cache";
-import { CacheProvider } from "@emotion/react";
 import { config as faConfig } from "@fortawesome/fontawesome-svg-core";
 import { CssBaseline } from "@mui/material";
+import { useTranslation } from "react-i18next";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 
 import NotificationBar from "@components/NotificationBar";
@@ -17,18 +16,25 @@ import {
     RevokeResetPasswordRoute,
     SettingsRoute,
 } from "@constants/Routes";
+import LanguageContextProvider from "@contexts/LanguageContext";
 import LocalStorageMethodContextProvider from "@contexts/LocalStorageMethodContext";
 import ThemeContextProvider from "@contexts/ThemeContext";
 import NotificationsContext from "@hooks/NotificationsContext";
 import { Notification } from "@models/Notifications";
 import { getBasePath } from "@utils/BasePath";
-import { getDuoSelfEnrollment, getRememberMe, getResetPassword, getResetPasswordCustomURL } from "@utils/Configuration";
+import {
+    getDuoSelfEnrollment,
+    getPasskeyLogin,
+    getRememberMe,
+    getResetPassword,
+    getResetPasswordCustomURL,
+} from "@utils/Configuration";
 import LoadingPage from "@views/LoadingPage/LoadingPage";
 import LoginPortal from "@views/LoginPortal/LoginPortal";
 
 import "@fortawesome/fontawesome-svg-core/styles.css";
 
-const ConsentView = lazy(() => import("@views/LoginPortal/ConsentView/ConsentView"));
+const ConsentPortal = lazy(() => import("@views/ConsentPortal/ConsentPortal"));
 const SignOut = lazy(() => import("@views/LoginPortal/SignOut/SignOut"));
 const ResetPasswordStep1 = lazy(() => import("@views/ResetPassword/ResetPasswordStep1"));
 const ResetPasswordStep2 = lazy(() => import("@views/ResetPassword/ResetPasswordStep2"));
@@ -38,21 +44,12 @@ const RevokeResetPasswordTokenView = lazy(() => import("@views/Revoke/RevokeRese
 
 faConfig.autoAddCss = false;
 
-export interface Props {
-    nonce?: string;
-}
-
-const App: React.FC<Props> = (props: Props) => {
+function App() {
     const [notification, setNotification] = useState(null as Notification | null);
-
-    const cache = createCache({
-        key: "authelia",
-        nonce: props.nonce,
-        prepend: true,
-    });
+    const { i18n } = useTranslation();
 
     return (
-        <CacheProvider value={cache}>
+        <LanguageContextProvider i18n={i18n}>
             <ThemeContextProvider>
                 <Suspense fallback={<LoadingPage />}>
                     <CssBaseline />
@@ -64,15 +61,16 @@ const App: React.FC<Props> = (props: Props) => {
                                     <Route path={ResetPasswordStep1Route} element={<ResetPasswordStep1 />} />
                                     <Route path={ResetPasswordStep2Route} element={<ResetPasswordStep2 />} />
                                     <Route path={LogoutRoute} element={<SignOut />} />
-                                    <Route path={ConsentRoute} element={<ConsentView />} />
                                     <Route path={RevokeOneTimeCodeRoute} element={<RevokeOneTimeCodeView />} />
                                     <Route path={RevokeResetPasswordRoute} element={<RevokeResetPasswordTokenView />} />
                                     <Route path={`${SettingsRoute}/*`} element={<SettingsRouter />} />
+                                    <Route path={`${ConsentRoute}/*`} element={<ConsentPortal />} />
                                     <Route
                                         path={`${IndexRoute}*`}
                                         element={
                                             <LoginPortal
                                                 duoSelfEnrollment={getDuoSelfEnrollment()}
+                                                passkeyLogin={getPasskeyLogin()}
                                                 rememberMe={getRememberMe()}
                                                 resetPassword={getResetPassword()}
                                                 resetPasswordCustomURL={getResetPasswordCustomURL()}
@@ -85,8 +83,8 @@ const App: React.FC<Props> = (props: Props) => {
                     </NotificationsContext.Provider>
                 </Suspense>
             </ThemeContextProvider>
-        </CacheProvider>
+        </LanguageContextProvider>
     );
-};
+}
 
 export default App;

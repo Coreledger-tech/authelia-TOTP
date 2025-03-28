@@ -5,7 +5,7 @@ summary: "A dashboard or control panel for users to adjust their settings is eas
 date: 2022-06-15T17:51:47+10:00
 draft: false
 images: []
-weight: 240
+weight: 340
 toc: true
 aliases:
   - /r/dashboard
@@ -44,7 +44,7 @@ Users should also be able to view all of their registered devices, and revoke th
 
 ### Password Reset
 
-{{< roadmap-status >}}
+{{< roadmap-status stage="complete">}}
 
 Add a method for users to reset their password given they know their current password.
 

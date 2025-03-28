@@ -11,8 +11,8 @@ import {
     DialogTitle,
     Theme,
 } from "@mui/material";
-import makeStyles from "@mui/styles/makeStyles";
 import { useTranslation } from "react-i18next";
+import { makeStyles } from "tss-react/mui";
 
 import OneTimeCodeTextField from "@components/OneTimeCodeTextField";
 import SuccessIcon from "@components/SuccessIcon";
@@ -33,7 +33,7 @@ type Props = {
 
 const IdentityVerificationDialog = function (props: Props) {
     const { t: translate } = useTranslation("settings");
-    const styles = useStyles();
+    const { classes } = useStyles();
 
     const { createErrorNotification } = useNotifications();
 
@@ -131,6 +131,22 @@ const IdentityVerificationDialog = function (props: Props) {
         }
     }, [codeInput, handleFailure, handleSuccess]);
 
+    const handleSubmitKeyDown = useCallback(
+        (event: React.KeyboardEvent<HTMLDivElement>) => {
+            if (event.key === "Enter") {
+                if (!codeInput.length) {
+                    setCodeError(true);
+                } else if (codeInput.length) {
+                    handleSubmit();
+                } else {
+                    setCodeError(false);
+                    codeRef.current?.focus();
+                }
+            }
+        },
+        [codeInput.length, handleSubmit],
+    );
+
     useEffect(() => {
         if (closing || !props.opening || !props.elevation) {
             return;
@@ -150,7 +166,7 @@ const IdentityVerificationDialog = function (props: Props) {
             {success ? (
                 <DialogContent>
                     <Box
-                        className={styles.success}
+                        className={classes.success}
                         sx={{
                             display: "flex",
                             flexDirection: "column",
@@ -190,6 +206,7 @@ const IdentityVerificationDialog = function (props: Props) {
                             error={codeError}
                             disabled={loading}
                             inputRef={codeRef}
+                            onKeyDown={handleSubmitKeyDown}
                         />
                     </Box>
                 </DialogContent>
@@ -221,16 +238,7 @@ const IdentityVerificationDialog = function (props: Props) {
     );
 };
 
-export default IdentityVerificationDialog;
-
-const useStyles = makeStyles((theme: Theme) => ({
-    centered: {
-        display: "flex",
-        flexDirection: "column",
-        m: "auto",
-        width: "fit-content",
-        marginY: "2.5rem",
-    },
+const useStyles = makeStyles()((theme: Theme) => ({
     success: {
         marginBottom: theme.spacing(2),
         flex: "0 0 100%",
@@ -241,3 +249,5 @@ const useStyles = makeStyles((theme: Theme) => ({
         marginY: "2.5rem",
     },
 }));
+
+export default IdentityVerificationDialog;

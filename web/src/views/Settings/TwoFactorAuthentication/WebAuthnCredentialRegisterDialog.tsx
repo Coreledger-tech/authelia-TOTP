@@ -1,4 +1,4 @@
-import React, { Fragment, MutableRefObject, useCallback, useEffect, useRef, useState } from "react";
+import React, { Fragment, useCallback, useEffect, useRef, useState } from "react";
 
 import {
     Box,
@@ -16,15 +16,19 @@ import {
     Typography,
 } from "@mui/material";
 import Grid from "@mui/material/Grid2";
-import makeStyles from "@mui/styles/makeStyles";
-import { PublicKeyCredentialCreationOptionsJSON } from "@simplewebauthn/types";
+import { PublicKeyCredentialCreationOptionsJSON } from "@simplewebauthn/browser";
 import { useTranslation } from "react-i18next";
+import { makeStyles } from "tss-react/mui";
 
 import InformationIcon from "@components/InformationIcon";
 import WebAuthnRegisterIcon from "@components/WebAuthnRegisterIcon";
 import { useNotifications } from "@hooks/NotificationsContext";
 import { AttestationResult, AttestationResultFailureString, WebAuthnTouchState } from "@models/WebAuthn";
-import { finishRegistration, getAttestationCreationOptions, startWebAuthnRegistration } from "@services/WebAuthn";
+import {
+    finishWebAuthnRegistration,
+    getWebAuthnRegistrationOptions,
+    startWebAuthnRegistration,
+} from "@services/WebAuthn";
 
 const steps = ["Description", "Verification"];
 
@@ -35,8 +39,8 @@ interface Props {
 
 const WebAuthnCredentialRegisterDialog = function (props: Props) {
     const { t: translate } = useTranslation("settings");
+    const { classes } = useStyles();
 
-    const styles = useStyles();
     const { createSuccessNotification, createErrorNotification } = useNotifications();
 
     const [state, setState] = useState(WebAuthnTouchState.WaitTouch);
@@ -46,7 +50,7 @@ const WebAuthnCredentialRegisterDialog = function (props: Props) {
     const [description, setDescription] = useState("");
     const [errorDescription, setErrorDescription] = useState(false);
 
-    const nameRef = useRef() as MutableRefObject<HTMLInputElement>;
+    const nameRef = useRef<HTMLInputElement | null>(null);
 
     const resetStates = () => {
         setState(WebAuthnTouchState.WaitTouch);
@@ -83,7 +87,7 @@ const WebAuthnCredentialRegisterDialog = function (props: Props) {
                     throw new Error("Credential Creation Request succeeded but Registration Response is empty.");
                 }
 
-                const response = await finishRegistration(result.response);
+                const response = await finishWebAuthnRegistration(result.response);
 
                 switch (response.status) {
                     case AttestationResult.Success:
@@ -147,7 +151,7 @@ const WebAuthnCredentialRegisterDialog = function (props: Props) {
                 return;
             }
 
-            const res = await getAttestationCreationOptions(description);
+            const res = await getWebAuthnRegistrationOptions(description);
 
             switch (res.status) {
                 case 200:
@@ -193,10 +197,10 @@ const WebAuthnCredentialRegisterDialog = function (props: Props) {
             case 0:
                 return (
                     <Box>
-                        <Box className={styles.icon}>
+                        <Box className={classes.icon}>
                             <InformationIcon />
                         </Box>
-                        <Typography className={styles.instruction}>
+                        <Typography className={classes.instruction}>
                             {translate("Enter a description for this WebAuthn Credential")}
                         </Typography>
                         <Grid container spacing={1}>
@@ -229,10 +233,10 @@ const WebAuthnCredentialRegisterDialog = function (props: Props) {
             case 1:
                 return (
                     <Fragment>
-                        <Box className={styles.icon}>
+                        <Box className={classes.icon}>
                             {timeout !== null ? <WebAuthnRegisterIcon timeout={timeout} /> : null}
                         </Box>
-                        <Typography className={styles.instruction}>
+                        <Typography className={classes.instruction}>
                             {translate("Touch the token on your security key")}
                         </Typography>
                     </Fragment>
@@ -302,9 +306,7 @@ const WebAuthnCredentialRegisterDialog = function (props: Props) {
     );
 };
 
-export default WebAuthnCredentialRegisterDialog;
-
-const useStyles = makeStyles((theme: Theme) => ({
+const useStyles = makeStyles()((theme: Theme) => ({
     icon: {
         paddingTop: theme.spacing(4),
         paddingBottom: theme.spacing(4),
@@ -313,3 +315,5 @@ const useStyles = makeStyles((theme: Theme) => ({
         paddingBottom: theme.spacing(4),
     },
 }));
+
+export default WebAuthnCredentialRegisterDialog;

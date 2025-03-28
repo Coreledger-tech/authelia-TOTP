@@ -1,17 +1,17 @@
 import React, { Fragment } from "react";
 
 import { Tooltip, Typography } from "@mui/material";
-import { Variant } from "@mui/material/styles/createTypography";
+import { TypographyVariant } from "@mui/material/styles";
 
 export interface Props {
-    variant: Variant;
+    variant: TypographyVariant;
 
     value?: string;
 
     tooltip?: string;
 }
 
-const TypographyWithTooltip = function (props: Props): JSX.Element {
+const TypographyWithTooltip = function (props: Props): React.JSX.Element {
     return (
         <Fragment>
             {props.tooltip ? (
