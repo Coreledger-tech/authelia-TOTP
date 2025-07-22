@@ -13,7 +13,7 @@ support:
   integration: true
 seo:
   title: "" # custom title (optional)
-  description: "" # custom description (recommended)
+  description: "Step-by-step guide to configuring Incus with OpenID Connect 1.0 for secure SSO. Enhance your login flow using Authelia’s modern identity management."
   canonical: "" # custom canonical URL (optional)
   noindex: false # false (default) or true
 ---
@@ -23,7 +23,7 @@ seo:
 - [Authelia]
   - [v4.38.10](https://github.com/authelia/authelia/releases/tag/v4.38.10)
 - [Incus]
-  - [6.0.1](https://github.com/lxc/incus/releases/tag/v6.0.1)
+  - [v6.0.1](https://github.com/lxc/incus/releases/tag/v6.0.1)
 
 {{% oidc-common %}}
 
@@ -31,9 +31,9 @@ seo:
 
 This example makes the following assumptions:
 
-* __Application Root URL:__ `https://incus.{{< sitevar name="domain" nojs="example.com" >}}/`
-* __Authelia Root URL:__ `https://{{< sitevar name="subdomain-authelia" nojs="auth" >}}.{{< sitevar name="domain" nojs="example.com" >}}/`
-* __Client ID:__ `incus`
+- __Application Root URL:__ `https://incus.{{< sitevar name="domain" nojs="example.com" >}}/`
+- __Authelia Root URL:__ `https://{{< sitevar name="subdomain-authelia" nojs="auth" >}}.{{< sitevar name="domain" nojs="example.com" >}}/`
+- __Client ID:__ `incus`
 
 Some of the values presented in this guide can automatically be replaced with documentation variables.
 
@@ -54,6 +54,8 @@ identity_providers:
         client_name: 'Incus'
         public: true
         authorization_policy: 'two_factor'
+        require_pkce: false
+        pkce_challenge_method: ''
         redirect_uris:
           - 'https://incus.{{< sitevar name="domain" nojs="example.com" >}}/iodc/callback'
         audience:
@@ -61,16 +63,23 @@ identity_providers:
         scopes:
           - 'openid'
           - 'offline_access'
+        response_types:
+            - 'code'
         grant_types:
-          - 'refresh_token'
           - 'authorization_code'
+          - 'refresh_token'
         access_token_signed_response_alg: 'RS256'
         userinfo_signed_response_alg: 'none'
+        token_endpoint_auth_method: 'none'
 ```
 
 ## Application
 
-To configure [Incus] to utilize Authelia as an [OpenID Connect 1.0] Provider:
+To configure [Incus] there is one method, using the [CLI](#cli).
+
+#### CLI
+
+To configure [Incus] to utilize Authelia as an [OpenID Connect 1.0] Provider, use the following instructions:
 
 1. Make sure Web Interface is configured and accessible from `https://incus.{{< sitevar name="domain" nojs="example.com" >}}/`.
 2. Set the following configuration options, either via individual commands as shown below or via the `incus config edit` command:

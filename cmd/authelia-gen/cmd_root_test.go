@@ -85,12 +85,17 @@ func TestSortCmds(t *testing.T) {
 		{
 			"ShouldSortRootCmd",
 			newRootCmd(),
-			[]string{"code", "commit-lint", "github", "locales", "docs"},
+			[]string{"code", "commit-lint", "github", "locales", "misc", "docs"},
 		},
 		{
 			"ShouldSortDocsCmd",
 			newDocsCmd(),
-			[]string{"cli", "data", pathJSONSchema, cmdUseManage, "date"},
+			[]string{"cli", "data", pathJSONSchema, cmdUseManage, "seo", "date"},
+		},
+		{
+			"ShouldSortDocsSEOCmd",
+			newDocsSEOCmd(),
+			[]string{"openid-connect"},
 		},
 		{
 			"ShouldSortGitHubCmd",
@@ -106,6 +111,16 @@ func TestSortCmds(t *testing.T) {
 			"ShouldSortDocsDataCmd",
 			newDocsDataCmd(),
 			[]string{"keys", "misc"},
+		},
+		{
+			"ShouldSortMiscCmd",
+			newMiscCmd(),
+			[]string{"locale-move [key]", "oidc"},
+		},
+		{
+			"ShouldSortMiscOIDCCmd",
+			newMiscOIDCCmd(),
+			[]string{"conformance"},
 		},
 	}
 

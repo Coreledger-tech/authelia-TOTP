@@ -2,7 +2,7 @@
 title: "Uptime Kuma"
 description: "Integrating Uptime Kuma status monitors with the Authelia OpenID Connect 1.0 Provider."
 summary: ""
-date: 2024-03-12T10:09:59+11:00
+date: 2024-03-14T06:00:14+11:00
 draft: false
 images: []
 weight: 620
@@ -13,17 +13,17 @@ support:
   integration: true
 seo:
   title: "" # custom title (optional)
-  description: "" # custom description (recommended)
+  description: "Step-by-step guide to configuring Uptime Kuma with OpenID Connect 1.0 for secure SSO. Enhance your login flow using Authelia’s modern identity management."
   canonical: "" # custom canonical URL (optional)
   noindex: false # false (default) or true
 ---
 
 ## Tested Versions
 
-* [Authelia]
-  * [v4.38.0](https://github.com/authelia/authelia/releases/tag/v4.38.0)
-* [Uptime Kuma]
-  * [v1.23.11](https://github.com/louislam/uptime-kuma/releases/tag/1.23.11)
+- [Authelia]
+  - [v4.38.0](https://github.com/authelia/authelia/releases/tag/v4.38.0)
+- [Uptime Kuma]
+  - [v1.23.11](https://github.com/louislam/uptime-kuma/releases/tag/1.23.11)
 
 {{% oidc-common %}}
 
@@ -31,11 +31,11 @@ seo:
 
 This example makes the following assumptions:
 
-* __Application Root URL:__ `https://uptime-kuma.{{< sitevar name="domain" nojs="example.com" >}}/`
-* __Authelia Root URL:__ `https://{{< sitevar name="subdomain-authelia" nojs="auth" >}}.{{< sitevar name="subdomain-authelia" nojs="auth" >}}.{{< sitevar name="domain" nojs="example.com" >}}/`
-* __Client ID:__ `uptime-kuma`
-* __Client Secret:__ `insecure_secret`
-* __Secured Resource URL:__ `https://application.{{< sitevar name="domain" nojs="example.com" >}}/`
+- __Application Root URL:__ `https://uptime-kuma.{{< sitevar name="domain" nojs="example.com" >}}/`
+- __Authelia Root URL:__ `https://{{< sitevar name="subdomain-authelia" nojs="auth" >}}.{{< sitevar name="domain" nojs="example.com" >}}/`
+- __Client ID:__ `uptime-kuma`
+- __Client Secret:__ `insecure_secret`
+- __Secured Resource URL:__ `https://application.{{< sitevar name="domain" nojs="example.com" >}}/`
 
 Some of the values presented in this guide can automatically be replaced with documentation variables.
 
@@ -99,13 +99,17 @@ identity_providers:
         client_name: 'Uptime Kuma'
         client_secret: '$pbkdf2-sha512$310000$c8p78n7pUMln0jzvd4aK4Q$JNRBzwAo0ek5qKn50cFzzvE9RXV88h1wJn5KGiHrD0YKtZaR/nCb2CJPOsKaPK0hjf.9yHxzQGZziziccp6Yng'  # The digest of 'insecure_secret'.
         public: false
+        require_pkce: false
+        pkce_challenge_method: ''
+        requested_audience_mode: 'implicit'
         scopes:
           - 'authelia.bearer.authz'
         audience:
           - 'https://application.{{< sitevar name="domain" nojs="example.com" >}}/'
         grant_types:
           - 'client_credentials'
-        requested_audience_mode: 'implicit'
+        access_token_signed_response_alg: 'none'
+        userinfo_signed_response_alg: 'none'
         token_endpoint_auth_method: 'client_secret_basic'
 ```
 
@@ -118,14 +122,18 @@ Notes:
 
 ### Application
 
-To configure [Uptime Kuma] to utilize Authelia as an [OpenID Connect 1.0] Provider:
+To configure [Uptime Kuma] there is one method, using the [Web GUI](#web-gui).
+
+#### Web GUI
+
+To configure [Uptime Kuma] to utilize Authelia as an [OpenID Connect 1.0] Provider, use the following instructions:
 
 1. Create a new status monitor or configure an existing one
 2. Choose monitor type e.g. HTTP(s) Keyword and set a keyword you want to find
 3. Set the URL to be monitored (this corresponds to the `audience` parameter in Authelia)
-4. Configure Authentication as follows:
-   - Method: OAuth2: Client Credentials
-   - Authentication Method: Authorization Header
+4. Configure the following options:
+   - Method: `OAuth2: Client Credentials`
+   - Authentication Method: `Authorization Header`
    - OAuth Token URL: `https://{{< sitevar name="subdomain-authelia" nojs="auth" >}}.{{< sitevar name="domain" nojs="example.com" >}}/api/oidc/token`
    - Client ID: `uptime-kuma`
    - Client Secret: `insecure_secret`
@@ -138,7 +146,7 @@ See the following screenshot for an authentication example of the above:
 
 [Authelia]: https://www.authelia.com
 [Uptime Kuma]: https://github.com/louislam/uptime-kuma
-[OpenID Connect 1.0]: ../openid-connect/introduction.md
+[OpenID Connect 1.0]: ../introduction.md
 [requested_audience_mode]: ../../configuration/identity-providers/openid-connect/clients/#requested_audience_mode
 [Server Authz Endpoints]: ../../configuration/miscellaneous/server-endpoints-authz/
 [client configuration]: ../../../configuration/identity-providers/openid-connect/clients.md

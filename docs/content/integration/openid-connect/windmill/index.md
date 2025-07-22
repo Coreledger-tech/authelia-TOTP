@@ -2,7 +2,7 @@
 title: "Windmill"
 description: "Integrating Windmill with the Authelia OpenID Connect 1.0 Provider."
 summary: ""
-date: 2023-12-10T10:52:22+11:00
+date: 2024-03-14T06:00:14+11:00
 draft: false
 images: []
 weight: 620
@@ -13,7 +13,7 @@ support:
   integration: true
 seo:
   title: "" # custom title (optional)
-  description: "" # custom description (recommended)
+  description: "Step-by-step guide to configuring Windmill with OpenID Connect 1.0 for secure SSO. Enhance your login flow using Authelia’s modern identity management."
   canonical: "" # custom canonical URL (optional)
   noindex: false # false (default) or true
 ---
@@ -23,7 +23,7 @@ seo:
 - [Authelia]
   - [v4.38.0](https://github.com/authelia/authelia/releases/tag/v4.38.0)
 - [Windmill]
-  - [1.224.0](https://github.com/windmill-labs/windmill/releases/tag/v1.224.0)
+  - [v1.224.0](https://github.com/windmill-labs/windmill/releases/tag/v1.224.0)
 
 {{% oidc-common %}}
 
@@ -31,10 +31,10 @@ seo:
 
 This example makes the following assumptions:
 
-* __Application Root URL:__ `https://windmill.{{< sitevar name="domain" nojs="example.com" >}}/`
-* __Authelia Root URL:__ `https://{{< sitevar name="subdomain-authelia" nojs="auth" >}}.{{< sitevar name="domain" nojs="example.com" >}}/`
-* __Client ID:__ `windmill`
-* __Client Secret:__ `insecure_secret`
+- __Application Root URL:__ `https://windmill.{{< sitevar name="domain" nojs="example.com" >}}/`
+- __Authelia Root URL:__ `https://{{< sitevar name="subdomain-authelia" nojs="auth" >}}.{{< sitevar name="domain" nojs="example.com" >}}/`
+- __Client ID:__ `windmill`
+- __Client Secret:__ `insecure_secret`
 
 Some of the values presented in this guide can automatically be replaced with documentation variables.
 
@@ -54,7 +54,10 @@ identity_providers:
       - client_id: 'windmill'
         client_name: 'Windmill'
         client_secret: '$pbkdf2-sha512$310000$c8p78n7pUMln0jzvd4aK4Q$JNRBzwAo0ek5qKn50cFzzvE9RXV88h1wJn5KGiHrD0YKtZaR/nCb2CJPOsKaPK0hjf.9yHxzQGZziziccp6Yng'  # The digest of 'insecure_secret'.
+        public: false
         authorization_policy: 'two_factor'
+        require_pkce: false
+        pkce_challenge_method: ''
         redirect_uris:
           - 'https://windmill.{{< sitevar name="domain" nojs="example.com" >}}/user/login_callback/authelia'
         scopes:
@@ -62,32 +65,34 @@ identity_providers:
           - 'profile'
           - 'email'
           - 'groups'
+        response_types:
+          - 'code'
+        grant_types:
+          - 'authorization_code'
+        access_token_signed_response_alg: 'none'
         userinfo_signed_response_alg: 'none'
+        token_endpoint_auth_method: 'client_secret_basic'
 ```
 
 ## Application
 
-### Core configuration
+To configure [Windmill] there is one method, using the [Web GUI](#web-gui).
 
-**Superadmin settings > Core**
+#### Web GUI
 
-- Base Url: `https://windmill.{{< sitevar name="domain" nojs="example.com" >}}`
+To configure [Windmill] to utilize Authelia as an [OpenID Connect 1.0] Provider, use the following instructions:
 
-{{< figure src="windmill_core.png" alt="Windmill" >}}
-
-> ⚠️ **Don't forget to press save.**
-
-### Auth configuration
-
-**Superadmin settings > SSO/OAuth**
-
-- Config URL: https://{{< sitevar name="subdomain-authelia" nojs="auth" >}}.{{< sitevar name="domain" nojs="example.com" >}}
-- Client Id: Windmill
-- Client Secret: insecure_secret
-
-{{< figure src="windmill_sso.png" alt="Windmill" >}}
-
-> ⚠️ **Don't forget to press save.**
+1. Navigate to Superadmin settings.
+2. Navigate to Core.
+3. Configure the following options:
+   - Base Url: `https://windmill.{{< sitevar name="domain" nojs="example.com" >}}`
+4. Click Save.
+5. Navigate to Superadmin settings.
+6. Navigate to SSO/OAuth.
+7. Configure the following options:
+   - Config URL: `https://{{< sitevar name="subdomain-authelia" nojs="auth" >}}.{{< sitevar name="domain" nojs="example.com" >}}`
+   - Client ID: `windmill`
+   - Client Secret: `insecure_secret`
 
 ## See Also
 

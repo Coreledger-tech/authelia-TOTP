@@ -7,15 +7,25 @@ import { Get, PostWithOptionalResponse, PostWithOptionalResponseRateLimited } fr
 
 interface CompletePushSignInBody {
     targetURL?: string;
-    workflow?: string;
-    workflowID?: string;
+    flowID?: string;
+    flow?: string;
+    subflow?: string;
+    userCode?: string;
 }
 
-export function completePushNotificationSignIn(targetURL?: string, workflow?: string, workflowID?: string) {
+export function completePushNotificationSignIn(
+    targetURL?: string,
+    flowID?: string,
+    flow?: string,
+    subflow?: string,
+    userCode?: string,
+) {
     const body: CompletePushSignInBody = {
-        targetURL: targetURL,
-        workflow: workflow,
-        workflowID: workflowID,
+        targetURL,
+        flowID,
+        flow,
+        subflow,
+        userCode,
     };
 
     return PostWithOptionalResponseRateLimited<DuoSignInResponse>(CompletePushNotificationSignInPath, body);

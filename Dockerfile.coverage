@@ -1,7 +1,7 @@
 # ========================================
 # ===== Build image for the frontend =====
 # ========================================
-FROM node:23-alpine@sha256:6eae672406a2bc8ed93eab6f9f76a02eb247e06ba82b2f5032c0a4ae07e825ba AS builder-frontend
+FROM node:24-alpine@sha256:820e86612c21d0636580206d802a726f2595366e1b867e564cbc652024151e8a AS builder-frontend
 
 WORKDIR /node/src/app
 
@@ -17,7 +17,7 @@ RUN \
 # =======================================
 # ===== Build image for the backend =====
 # =======================================
-FROM golang:1.24.1-bookworm@sha256:fa1a01d362a7b9df68b021d59a124d28cae6d99ebd1a876e3557c4dd092f1b1d AS builder-backend
+FROM golang:1.24.5-bookworm@sha256:69adc37c19ac6ef724b561b0dc675b27d8c719dfe848db7dd1092a7c9ac24bc6 AS builder-backend
 
 WORKDIR /go/src/app
 
@@ -37,7 +37,7 @@ ARG LDFLAGS_EXTRA
 RUN \
 	mv api internal/server/public_html/api && \
 	echo ">> Starting go build (coverage via -cover)..." && \
-	GOEXPERIMENT="nosynchashtriemap" CGO_ENABLED=1 CGO_CPPFLAGS="-D_FORTIFY_SOURCE=2 -fstack-protector-strong" CGO_LDFLAGS="-Wl,-z,relro,-z,now" go build -cover -covermode=atomic \
+	GOEXPERIMENT="nosynchashtriemap" CGO_ENABLED=1 CGO_CPPFLAGS="-D_FORTIFY_SOURCE=2 -fstack-protector-strong" CGO_LDFLAGS="-Wl,-z,relro,-z,now" go build -tags dev -cover -covermode=atomic \
 	-ldflags "${LDFLAGS_EXTRA}" -o authelia ./cmd/authelia
 
 # ===================================

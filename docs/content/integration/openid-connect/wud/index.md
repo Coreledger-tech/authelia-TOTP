@@ -2,7 +2,7 @@
 title: "WUD (What's Up Docker)"
 description: "Integrating WUD (What's Up Docker) with the Authelia OpenID Connect 1.0 Provider."
 summary: ""
-date: 2022-06-15T17:51:47+10:00
+date: 2025-01-13T08:35:59+11:00
 draft: false
 images: []
 weight: 620
@@ -13,17 +13,17 @@ support:
   integration: true
 seo:
   title: "" # custom title (optional)
-  description: "" # custom description (recommended)
+  description: "Step-by-step guide to configuring WUD (What's Up Docker) with OpenID Connect 1.0 for secure SSO. Enhance your login flow using Authelia’s modern identity management."
   canonical: "" # custom canonical URL (optional)
   noindex: false # false (default) or true
 ---
 
 ## Tested Versions
 
-* [Authelia]
-  * [v4.38.18](https://github.com/authelia/authelia/releases/tag/v4.38.18)
-* [WUD]
-  * [8.0.0](https://github.com/getwud/wud/releases/tag/8.0.0)
+- [Authelia]
+  - [v4.38.18](https://github.com/authelia/authelia/releases/tag/v4.38.18)
+- [WUD]
+  - [v8.0.0](https://github.com/getwud/wud/releases/tag/8.0.0)
 
 {{% oidc-common %}}
 
@@ -31,10 +31,10 @@ seo:
 
 This example makes the following assumptions:
 
-* __Application Root URL:__ `https://wud.{{< sitevar name="domain" nojs="example.com" >}}/`
-* __Authelia Root URL:__ `https://{{< sitevar name="subdomain-authelia" nojs="auth" >}}.{{< sitevar name="domain" nojs="example.com" >}}/`
-* __Client ID:__ `wud`
-* __Client Secret:__ `insecure_secret`
+- __Application Root URL:__ `https://wud.{{< sitevar name="domain" nojs="example.com" >}}/`
+- __Authelia Root URL:__ `https://{{< sitevar name="subdomain-authelia" nojs="auth" >}}.{{< sitevar name="domain" nojs="example.com" >}}/`
+- __Client ID:__ `wud`
+- __Client Secret:__ `insecure_secret`
 
 Some of the values presented in this guide can automatically be replaced with documentation variables.
 
@@ -58,30 +58,48 @@ identity_providers:
         client_secret: '$pbkdf2-sha512$310000$c8p78n7pUMln0jzvd4aK4Q$JNRBzwAo0ek5qKn50cFzzvE9RXV88h1wJn5KGiHrD0YKtZaR/nCb2CJPOsKaPK0hjf.9yHxzQGZziziccp6Yng'  # The digest of 'insecure_secret'.
         public: false
         authorization_policy: 'two_factor'
+        require_pkce: false
+        pkce_challenge_method: ''
         redirect_uris:
           - 'https://wud.{{< sitevar name="domain" nojs="example.com" >}}/auth/oidc/authelia/cb'
         scopes:
           - 'openid'
           - 'email'
           - 'profile'
+        response_types:
+          - 'code'
+        grant_types:
+          - 'authorization_code'
+        access_token_signed_response_alg: 'none'
         userinfo_signed_response_alg: 'none'
         token_endpoint_auth_method: 'client_secret_basic'
 ```
 
 ### Application
 
-1. To configure [WUD] to utilize Authelia as an
-   [OpenID Connect 1.0](https://www.authelia.com/integration/openid-connect/introduction/) Provider, specify the below
-   environment variables.
+To configure [WUD] there is one method, using the [Environment Variables](#environment-variables).
 
-```yaml
+#### Environment Variables
+
+To configure [WUD] to utilize Authelia as an [OpenID Connect 1.0] Provider, use the following environment variables:
+
+##### Standard
+
+```shell {title=".env"}
+WUD_AUTH_OIDC_AUTHELIA_DISCOVERY=https://{{< sitevar name="subdomain-authelia" nojs="auth" >}}.{{< sitevar name="domain" nojs="example.com" >}}/.well-known/openid-configuration
+WUD_AUTH_OIDC_AUTHELIA_CLIENTID=wud
+WUD_AUTH_OIDC_AUTHELIA_CLIENTSECRET=insecure_secret
+```
+
+##### Docker Compose
+
+```yaml {title="compose.yml"}
 services:
   wud:
-    image: 'getwud/wud'
     environment:
+      WUD_AUTH_OIDC_AUTHELIA_DISCOVERY: 'https://{{< sitevar name="subdomain-authelia" nojs="auth" >}}.{{< sitevar name="domain" nojs="example.com" >}}/.well-known/openid-configuration'
       WUD_AUTH_OIDC_AUTHELIA_CLIENTID: 'wud'
       WUD_AUTH_OIDC_AUTHELIA_CLIENTSECRET: 'insecure_secret'
-      WUD_AUTH_OIDC_AUTHELIA_DISCOVERY: 'https://{{< sitevar name="subdomain-authelia" nojs="auth" >}}.{{< sitevar name="domain" nojs="example.com" >}}/.well-known/openid-configuration'
 ```
 
 ## See Also

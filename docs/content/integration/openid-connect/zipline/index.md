@@ -2,7 +2,7 @@
 title: "Zipline"
 description: "Integrating Zipline with the Authelia OpenID Connect 1.0 Provider."
 summary: ""
-date: 2023-11-12T21:18:09+11:00
+date: 2025-03-04T23:12:34+11:00
 draft: false
 images: []
 weight: 620
@@ -13,17 +13,17 @@ support:
   integration: true
 seo:
   title: "" # custom title (optional)
-  description: "" # custom description (recommended)
+  description: "Step-by-step guide to configuring Zipline with OpenID Connect 1.0 for secure SSO. Enhance your login flow using Authelia’s modern identity management."
   canonical: "" # custom canonical URL (optional)
   noindex: false # false (default) or true
 ---
 
 ## Tested Versions
 
-* [Authelia]
-  * [v4.38.0](https://github.com/authelia/authelia/releases/tag/v4.38.0)
-* [Zipline]
-  * [4.0.0](https://github.com/diced/zipline/releases/tag/v4.0.0)
+- [Authelia]
+  - [v4.38.0](https://github.com/authelia/authelia/releases/tag/v4.38.0)
+- [Zipline]
+  - [v4.0.0](https://github.com/diced/zipline/releases/tag/v4.0.0)
 
 {{% oidc-common %}}
 
@@ -31,10 +31,10 @@ seo:
 
 This example makes the following assumptions:
 
-* __Application Root URL:__ `https://zipline.{{< sitevar name="domain" nojs="example.com" >}}/`
-* __Authelia Root URL:__ `https://{{< sitevar name="subdomain-authelia" nojs="auth" >}}.{{< sitevar name="domain" nojs="example.com" >}}/`
-* __Client ID:__ `zipline`
-* __Client Secret:__ `insecure_secret`
+- __Application Root URL:__ `https://zipline.{{< sitevar name="domain" nojs="example.com" >}}/`
+- __Authelia Root URL:__ `https://{{< sitevar name="subdomain-authelia" nojs="auth" >}}.{{< sitevar name="domain" nojs="example.com" >}}/`
+- __Client ID:__ `zipline`
+- __Client Secret:__ `insecure_secret`
 
 Some of the values presented in this guide can automatically be replaced with documentation variables.
 
@@ -57,36 +57,45 @@ identity_providers:
         client_name: 'Zipline'
         client_secret: '$pbkdf2-sha512$310000$c8p78n7pUMln0jzvd4aK4Q$JNRBzwAo0ek5qKn50cFzzvE9RXV88h1wJn5KGiHrD0YKtZaR/nCb2CJPOsKaPK0hjf.9yHxzQGZziziccp6Yng'  # The digest of 'insecure_secret'.
         public: false
+        require_pkce: false
+        pkce_challenge_method: ''
         redirect_uris:
           - 'https://zipline.{{< sitevar name="domain" nojs="example.com" >}}/api/auth/oauth/oidc'
         scopes:
           - 'openid'
+          - 'offline_access'
           - 'email'
           - 'profile'
-          - offline_access
-        response_types: 'code'
-        token_endpoint_auth_method: 'client_secret_post'
+        response_types:
+          - 'code'
+        grant_types:
+          - 'refresh_token'
+          - 'authorization_code'
+        access_token_signed_response_alg: 'none'
+        userinfo_signed_response_alg: 'none'
+        token_endpoint_auth_method: 'client_secret_basic'
 ```
 
 ### Application
 
-To configure [Zipline] to utilize Authelia as an [OpenID Connect 1.0] Provider:
+To configure [Zipline] there is one method, using the [Web GUI](#web-gui).
 
-1. Go to Server Settings
-2. Activate the **OAuth Registration** feature toggle
-2. Configure:
-   1. OIDC Client ID: `ziplinea`
-   2. OIDC Client Secret: `insecure_secret`
-   3. OIDC Authorize URL: `https://{{< sitevar name="subdomain-authelia" nojs="auth" >}}.{{< sitevar name="domain" nojs="example.com" >}}/api/oidc/authorization`
-   4. OIDC Token URL: `https://{{< sitevar name="subdomain-authelia" nojs="auth" >}}.{{< sitevar name="domain" nojs="example.com" >}}/api/oidc/token`
-   5. OIDC Userinfo URL: `https://{{< sitevar name="subdomain-authelia" nojs="auth" >}}.{{< sitevar name="domain" nojs="example.com" >}}/api/oidc/userinfo`
-   6. OIDC Redirect URL can be left blank, but the default Zipline URL is HTTP, if you didn't activate **Return HTTPS URLs** in the Core settings, this impacts the OIDC Redirect URL
-3. Click Save
+#### Web GUI
+
+To configure [Zipline] to utilize Authelia as an [OpenID Connect 1.0] Provider, use the following instructions:
+
+1. Go to Server Settings.
+2. Activate the **OAuth Registration** feature toggle.
+3. Configure the following options:
+   - OIDC Client ID: `zipline`
+   - OIDC Client Secret: `insecure_secret`
+   - OIDC Authorize URL: `https://{{< sitevar name="subdomain-authelia" nojs="auth" >}}.{{< sitevar name="domain" nojs="example.com" >}}/api/oidc/authorization`
+   - OIDC Token URL: `https://{{< sitevar name="subdomain-authelia" nojs="auth" >}}.{{< sitevar name="domain" nojs="example.com" >}}/api/oidc/token`
+   - OIDC Userinfo URL: `https://{{< sitevar name="subdomain-authelia" nojs="auth" >}}.{{< sitevar name="domain" nojs="example.com" >}}/api/oidc/userinfo`
+   - OIDC Redirect URL can be left blank, but the default Zipline URL is HTTP, if you didn't activate **Return HTTPS URLs** in the Core settings, this impacts the OIDC Redirect URL
+4. Click Save.
 
 {{< figure src="zipline.png" alt="Zipline configuration" width="300" >}}
-
-Take a look at the [See Also](#see-also) section for the cheatsheets corresponding to the sections above for their
-descriptions.
 
 ## See Also
 

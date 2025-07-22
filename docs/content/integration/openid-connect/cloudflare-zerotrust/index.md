@@ -2,7 +2,7 @@
 title: "Cloudflare Zero Trust"
 description: "Integrating Cloudflare Zero Trust with the Authelia OpenID Connect 1.0 Provider."
 summary: ""
-date: 2022-06-15T17:51:47+10:00
+date: 2024-03-14T06:00:14+11:00
 draft: false
 images: []
 weight: 620
@@ -13,40 +13,40 @@ support:
   integration: true
 seo:
   title: "" # custom title (optional)
-  description: "" # custom description (recommended)
+  description: "Step-by-step guide to configuring Cloudflare Zero Trust with OpenID Connect 1.0 for secure SSO. Enhance your login flow using Authelia’s modern identity management."
   canonical: "" # custom canonical URL (optional)
   noindex: false # false (default) or true
 ---
 
 ## Tested Versions
 
-* [Authelia]
-  * [v4.38.0](https://github.com/authelia/authelia/releases/tag/v4.38.0)
+- [Authelia]
+  - [v4.39.5](https://github.com/authelia/authelia/releases/tag/v4.39.5)
 
-{{% oidc-common %}}
+{{% oidc-common bugs="client-credentials-encoding,claims-hydration" %}}
 
 ### Assumptions
 
 This example makes the following assumptions:
 
-* __Cloudflare Team Name:__ `example-team`
-* __Authelia Root URL:__ `https://{{< sitevar name="subdomain-authelia" nojs="auth" >}}.{{< sitevar name="domain" nojs="example.com" >}}/`
-* __Client ID:__ `cloudflare`
-* __Client Secret:__ `insecure_secret`
+- __Cloudflare Team Name:__ `example-team`
+- __Authelia Root URL:__ `https://{{< sitevar name="subdomain-authelia" nojs="auth" >}}.{{< sitevar name="domain" nojs="example.com" >}}/`
+- __Client ID:__ `cloudflare`
+- __Client Secret:__ `insecure_secret`
 
 Some of the values presented in this guide can automatically be replaced with documentation variables.
 
 {{< sitevar-preferences >}}
 
-{{< callout context="caution" title="Important Note" icon="outline/alert-triangle" >}}
-[Cloudflare Zero Trust](https://www.cloudflare.com/products/zero-trust/) does not properly URL encode the secret per [RFC6749 Appendix B](https://datatracker.ietf.org/doc/html/rfc6749#appendix-B) at the
-time this article was last modified (noted at the bottom). This means you'll either have to use only alphanumeric
-characters for the secret or URL encode the secret yourself.
-{{< /callout >}}
-
 ## Configuration
 
 ### Authelia
+
+{{< callout context="caution" title="Important Note" icon="outline/alert-triangle" >}}
+At the time of this writing this third party client has a bug and does not support [OpenID Connect 1.0](https://openid.net/specs/openid-connect-core-1_0.html). This
+configuration will likely require configuration of an escape hatch to work around the bug on their end. See
+[Configuration Escape Hatch](#configuration-escape-hatch) for details.
+{{< /callout >}}
 
 The following YAML configuration is an example __Authelia__ [client configuration] for use with [Cloudflare] which will
 operate with the application example:
@@ -62,14 +62,26 @@ identity_providers:
         client_secret: '$pbkdf2-sha512$310000$c8p78n7pUMln0jzvd4aK4Q$JNRBzwAo0ek5qKn50cFzzvE9RXV88h1wJn5KGiHrD0YKtZaR/nCb2CJPOsKaPK0hjf.9yHxzQGZziziccp6Yng'  # The digest of 'insecure_secret'.
         public: false
         authorization_policy: 'two_factor'
+        require_pkce: true
+        pkce_challenge_method: 'S256'
         redirect_uris:
           - 'https://example-team.cloudflareaccess.com/cdn-cgi/access/callback'
         scopes:
           - 'openid'
           - 'profile'
           - 'email'
+        response_types:
+          - 'code'
+        grant_types:
+          - 'authorization_code'
+        access_token_signed_response_alg: 'none'
         userinfo_signed_response_alg: 'none'
+        token_endpoint_auth_method: 'client_secret_basic'
 ```
+
+#### Configuration Escape Hatch
+
+{{% oidc-escape-hatch-claims-hydration client_id="cloudflare" %}}
 
 ### Application
 
@@ -79,27 +91,32 @@ means that the URLs are accessible to foreign clients on the internet. There may
 accessibility to foreign clients on the internet on Cloudflare's end, but this is beyond the scope of this document.
 {{< /callout >}}
 
-To configure [Cloudflare Zero Trust] to utilize Authelia as an [OpenID Connect 1.0] Provider:
+To configure [Cloudflare Zero Trust] there is one method, using the [Web GUI](#web-gui).
+
+#### Web GUI
+
+To configure [Cloudflare Zero Trust] to utilize Authelia as an [OpenID Connect 1.0] Provider, use the following
+instructions:
 
 1. Visit the [Cloudflare Zero Trust Dashboard](https://dash.teams.cloudflare.com)
 2. Visit `Settings`
 3. Visit `Authentication`
 4. Under `Login methods` select `Add new`
 5. Select `OpenID Connect`
-6. Set the following values:
-   1. Name: `Authelia`
-   2. App ID: `cloudflare`
-   3. Client Secret: `insecure_secret`
-   4. Auth URL: `https://{{< sitevar name="subdomain-authelia" nojs="auth" >}}.{{< sitevar name="domain" nojs="example.com" >}}/api/oidc/authorization`
-   5. Token URL: `https://{{< sitevar name="subdomain-authelia" nojs="auth" >}}.{{< sitevar name="domain" nojs="example.com" >}}/api/oidc/token`
-   6. Certificate URL: `https://{{< sitevar name="subdomain-authelia" nojs="auth" >}}.{{< sitevar name="domain" nojs="example.com" >}}/jwks.json`
-   7. Enable `Proof Key for Code Exchange (PKCE)`
-   8. Add the following OIDC Claims: `preferred_username`, `mail`
+6. Configure the following options:
+   - Name: `Authelia`
+   - App ID: `cloudflare`
+   - Client Secret: `insecure_secret`
+   - Auth URL: `https://{{< sitevar name="subdomain-authelia" nojs="auth" >}}.{{< sitevar name="domain" nojs="example.com" >}}/api/oidc/authorization`
+   - Token URL: `https://{{< sitevar name="subdomain-authelia" nojs="auth" >}}.{{< sitevar name="domain" nojs="example.com" >}}/api/oidc/token`
+   - Certificate URL: `https://{{< sitevar name="subdomain-authelia" nojs="auth" >}}.{{< sitevar name="domain" nojs="example.com" >}}/jwks.json`
+   - Enable `Proof Key for Code Exchange (PKCE)`
+   - Add the following OIDC Claims: `preferred_username`, `mail`
 7. Click Save
 
 ## See Also
 
-* [Cloudflare Zero Trust Generic OIDC Documentation](https://developers.cloudflare.com/cloudflare-one/identity/idp-integration/generic-oidc/)
+- [Cloudflare Zero Trust Generic OIDC Documentation](https://developers.cloudflare.com/cloudflare-one/identity/idp-integration/generic-oidc/)
 
 [Authelia]: https://www.authelia.com
 [Cloudflare]: https://www.cloudflare.com/

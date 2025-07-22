@@ -65,22 +65,16 @@ func (ctx *CmdCtx) ConfigStorageCommandLineConfigRunE(cmd *cobra.Command, _ []st
 
 		cmdFlagNameSQLite3Path: "storage.local.path",
 
-		cmdFlagNameMySQLHost:     "storage.mysql.host",
-		cmdFlagNameMySQLPort:     "storage.mysql.port",
+		cmdFlagNameMySQLAddress:  "storage.mysql.address",
 		cmdFlagNameMySQLDatabase: "storage.mysql.database",
 		cmdFlagNameMySQLUsername: "storage.mysql.username",
 		cmdFlagNameMySQLPassword: "storage.mysql.password",
 
-		cmdFlagNamePostgreSQLHost:       "storage.postgres.host",
-		cmdFlagNamePostgreSQLPort:       "storage.postgres.port",
-		cmdFlagNamePostgreSQLDatabase:   "storage.postgres.database",
-		cmdFlagNamePostgreSQLSchema:     "storage.postgres.schema",
-		cmdFlagNamePostgreSQLUsername:   "storage.postgres.username",
-		cmdFlagNamePostgreSQLPassword:   "storage.postgres.password",
-		"postgres.ssl.mode":             "storage.postgres.ssl.mode",
-		"postgres.ssl.root_certificate": "storage.postgres.ssl.root_certificate",
-		"postgres.ssl.certificate":      "storage.postgres.ssl.certificate",
-		"postgres.ssl.key":              "storage.postgres.ssl.key",
+		cmdFlagNamePostgreSQLAddress:  "storage.postgres.address",
+		cmdFlagNamePostgreSQLDatabase: "storage.postgres.database",
+		cmdFlagNamePostgreSQLSchema:   "storage.postgres.schema",
+		cmdFlagNamePostgreSQLUsername: "storage.postgres.username",
+		cmdFlagNamePostgreSQLPassword: "storage.postgres.password",
 
 		cmdFlagNamePeriod:     "totp.period",
 		cmdFlagNameDigits:     "totp.digits",
@@ -1448,7 +1442,7 @@ func (ctx *CmdCtx) StorageUserTOTPExportURIRunE(_ *cobra.Command, _ []string) (e
 		}
 
 		for _, c := range configs {
-			buf.WriteString(fmt.Sprintf("%s\n", c.URI()))
+			fmt.Fprintf(buf, "%s\n", c.URI())
 		}
 
 		l := len(configs)
@@ -1499,7 +1493,7 @@ func (ctx *CmdCtx) StorageUserTOTPExportCSVRunE(cmd *cobra.Command, _ []string) 
 		}
 
 		for _, c := range configs {
-			buf.WriteString(fmt.Sprintf("%s,%s,%s,%d,%d,%s\n", c.Issuer, c.Username, c.Algorithm, c.Digits, c.Period, string(c.Secret)))
+			fmt.Fprintf(buf, "%s,%s,%s,%d,%d,%s\n", c.Issuer, c.Username, c.Algorithm, c.Digits, c.Period, string(c.Secret))
 		}
 
 		l := len(configs)

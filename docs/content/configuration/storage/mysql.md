@@ -2,7 +2,7 @@
 title: "MySQL"
 description: "MySQL Configuration"
 summary: "The MySQL storage provider which supports both MySQL and MariaDB."
-date: 2022-06-15T17:51:47+10:00
+date: 2024-03-14T06:00:14+11:00
 draft: false
 images: []
 weight: 107600
@@ -54,9 +54,9 @@ storage:
         ...
         -----END CERTIFICATE-----
       private_key: |
-        -----BEGIN RSA PRIVATE KEY-----
+        -----BEGIN PRIVATE KEY-----
         ...
-        -----END RSA PRIVATE KEY-----
+        -----END PRIVATE KEY-----
 ```
 
 ## Options

@@ -2,7 +2,7 @@
 title: "Templating"
 description: "A reference guide on the templates system"
 summary: "This section contains reference documentation for Authelia's templating capabilities."
-date: 2022-12-23T21:58:54+11:00
+date: 2024-03-14T06:00:14+11:00
 draft: false
 images: []
 weight: 220
@@ -197,6 +197,11 @@ quote char is `"` instead of `'`).
 Similar to the `squote` function except it skips quoting for strings with multiple lines.
 
 See the [mindent example](#mindent-example) for an example usage.
+
+#### urlqueryarg
+
+This function takes two parameters; a URL and key. The function parses the URL and returns the given value of the key in
+the query string provided it exists.
 
 #### glob
 

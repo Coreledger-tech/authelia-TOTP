@@ -275,6 +275,9 @@
     ## Enable the metadata fetch behaviour.
     # enabled: false
 
+    ## Configure the Cache Policy for the Metadata Service.
+    # cache_policy: 'strict'
+
     ## Enable Validation of the Trust Anchor. This generally should be enabled if you're using the metadata. It
     ## ensures the attestation certificate presented by the authenticator is valid against the MDS3 certificate that
     ## issued the attestation certificate.
@@ -495,9 +498,9 @@ identity_validation:
       ## The private key used with the certificate_chain if the server requests TLS Client Authentication
       ## i.e. Mutual TLS.
       # private_key: |
-        # -----BEGIN RSA PRIVATE KEY-----
+        # -----BEGIN PRIVATE KEY-----
         # ...
-        # -----END RSA PRIVATE KEY-----
+        # -----END PRIVATE KEY-----
 
     ## Connection Pooling configuration.
     # pooling:
@@ -619,6 +622,7 @@ identity_validation:
         # key_length: 32
         # salt_length: 16
       # scrypt:
+        # variant: 'scrypt'
         # iterations: 16
         # block_size: 8
         # parallelism: 1
@@ -940,9 +944,9 @@ session:
       ## The private key used with the certificate_chain if the server requests TLS Client Authentication
       ## i.e. Mutual TLS.
       # private_key: |
-        # -----BEGIN RSA PRIVATE KEY-----
+        # -----BEGIN PRIVATE KEY-----
         # ...
-        # -----END RSA PRIVATE KEY-----
+        # -----END PRIVATE KEY-----
 
     ## The Redis HA configuration options.
     ## This provides specific options to Redis Sentinel, sentinel_name must be defined (Master Name).
@@ -1069,9 +1073,9 @@ session:
       ## The private key used with the certificate_chain if the server requests TLS Client Authentication
       ## i.e. Mutual TLS.
       # private_key: |
-        # -----BEGIN RSA PRIVATE KEY-----
+        # -----BEGIN PRIVATE KEY-----
         # ...
-        # -----END RSA PRIVATE KEY-----
+        # -----END PRIVATE KEY-----
 
   ##
   ## PostgreSQL (Storage Provider)
@@ -1103,9 +1107,9 @@ session:
             # ...
             # -----END CERTIFICATE-----
           # private_key: |
-            # -----BEGIN RSA PRIVATE KEY-----
+            # -----BEGIN PRIVATE KEY-----
             # ...
-            # -----END RSA PRIVATE KEY-----
+            # -----END PRIVATE KEY-----
 
     ## The database name to use.
     # database: 'authelia'
@@ -1156,9 +1160,9 @@ session:
       ## The private key used with the certificate_chain if the server requests TLS Client Authentication
       ## i.e. Mutual TLS.
       # private_key: |
-        # -----BEGIN RSA PRIVATE KEY-----
+        # -----BEGIN PRIVATE KEY-----
         # ...
-        # -----END RSA PRIVATE KEY-----
+        # -----END PRIVATE KEY-----
 
 ##
 ## Notification Provider
@@ -1254,9 +1258,9 @@ session:
       ## The private key used with the certificate_chain if the server requests TLS Client Authentication
       ## i.e. Mutual TLS.
       # private_key: |
-        # -----BEGIN RSA PRIVATE KEY-----
+        # -----BEGIN PRIVATE KEY-----
         # ...
-        # -----END RSA PRIVATE KEY-----
+        # -----END PRIVATE KEY-----
 
 ##
 ## Identity Providers
@@ -1289,9 +1293,9 @@ session:
 
       ## Required Private Key in PEM DER form.
       # key: |
-        # -----BEGIN RSA PRIVATE KEY-----
+        # -----BEGIN PRIVATE KEY-----
         # ...
-        # -----END RSA PRIVATE KEY-----
+        # -----END PRIVATE KEY-----
 
 
       ## Optional matching certificate chain in PEM DER form that matches the key. All certificates within the chain

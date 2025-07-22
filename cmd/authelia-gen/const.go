@@ -41,8 +41,21 @@ const (
 )
 
 const (
+	suiteNameBasicFormPost           = "basic-form-post"
+	suiteNameHybridFormPost          = "hybrid-form-post"
+	suiteNameImplicitFormPost        = "implicit-form-post"
+	suiteConformanceBasic            = "conformance-basic"
+	suiteConformanceBasicFormPost    = "conformance-basic-form-post"
+	suiteConformanceImplicit         = "conformance-implicit"
+	suiteConformanceImplicitFormPost = "conformance-implicit-form-post"
+	suiteConformanceHybrid           = "conformance-hybrid"
+	suiteConformanceHybridFormPost   = "conformance-hybrid-form-post"
+)
+
+const (
 	pathJSONSchema = "json-schema"
 	extJSON        = ".json"
+	extYAML        = ".yaml"
 )
 
 const (
@@ -64,6 +77,7 @@ const (
 	cmdUseCompletion             = "completion"
 	cmdUseDocs                   = "docs"
 	cmdUseManage                 = "manage"
+	cmdUseMisc                   = "misc"
 	cmdUseDocsDate               = "date"
 	cmdUseDocsCLI                = "cli"
 	cmdUseDocsData               = "data"
@@ -144,7 +158,7 @@ var (
 		{Name: "default-src", Value: ""},
 		{Name: "frame-src", Value: "'none'"},
 		{Name: "object-src", Value: "'none'"},
-		{Name: "style-src", Value: "'self' 'nonce-%s'"},
+		{Name: "style-src", Value: "'self' 'nonce-%s' 'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU='"},
 		{Name: "frame-ancestors", Value: "'none'"},
 		{Name: "base-uri", Value: "'self'"},
 	}

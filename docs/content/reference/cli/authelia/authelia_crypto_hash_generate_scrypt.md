@@ -2,7 +2,7 @@
 title: "authelia crypto hash generate scrypt"
 description: "Reference for the authelia crypto hash generate scrypt command."
 lead: ""
-date: 2022-10-17T21:51:59+11:00
+date: 2024-03-14T06:00:14+11:00
 draft: false
 images: []
 weight: 905
@@ -43,6 +43,7 @@ authelia crypto hash generate scrypt --help
   -k, --key-size int      key size in bytes (default 32)
   -p, --parallelism int   parallelism or threads (default 1)
   -s, --salt-size int     salt size in bytes (default 16)
+  -v, --variant string    variant, options are 'scrypt', and 'yescrypt' (default "scrypt")
 ```
 
 ### Options inherited from parent commands

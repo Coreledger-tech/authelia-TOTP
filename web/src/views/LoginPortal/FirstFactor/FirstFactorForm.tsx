@@ -1,5 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import {
     Alert,
     AlertTitle,
@@ -8,6 +10,8 @@ import {
     CircularProgress,
     FormControl,
     FormControlLabel,
+    IconButton,
+    InputAdornment,
     Link,
     Theme,
 } from "@mui/material";
@@ -20,9 +24,10 @@ import { makeStyles } from "tss-react/mui";
 
 import { ResetPasswordStep1Route } from "@constants/Routes";
 import { RedirectionURL, RequestMethod } from "@constants/SearchParams";
+import { useFlow } from "@hooks/Flow";
 import { useNotifications } from "@hooks/NotificationsContext";
+import { useUserCode } from "@hooks/OpenIDConnect";
 import { useQueryParam } from "@hooks/QueryParam";
-import { useWorkflow } from "@hooks/Workflow";
 import LoginLayout from "@layouts/LoginLayout";
 import { IsCapsLockModified } from "@services/CapsLock";
 import { postFirstFactor } from "@services/Password";
@@ -48,7 +53,8 @@ const FirstFactorForm = function (props: Props) {
     const navigate = useNavigate();
     const redirectionURL = useQueryParam(RedirectionURL);
     const requestMethod = useQueryParam(RequestMethod);
-    const [workflow, workflowID] = useWorkflow();
+    const { id: flowID, flow, subflow } = useFlow();
+    const userCode = useUserCode();
     const { createErrorNotification } = useNotifications();
 
     const loginChannel = useMemo(() => new BroadcastChannel<boolean>("login"), []);
@@ -57,6 +63,7 @@ const FirstFactorForm = function (props: Props) {
     const [username, setUsername] = useState("");
     const [usernameError, setUsernameError] = useState(false);
     const [password, setPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
     const [passwordCapsLock, setPasswordCapsLock] = useState(false);
     const [passwordCapsLockPartial, setPasswordCapsLockPartial] = useState(false);
     const [passwordError, setPasswordError] = useState(false);
@@ -119,8 +126,10 @@ const FirstFactorForm = function (props: Props) {
                 rememberMe,
                 redirectionURL,
                 requestMethod,
-                workflow,
-                workflowID,
+                flowID,
+                flow,
+                subflow,
+                userCode,
             );
 
             setLoading(false);
@@ -136,18 +145,20 @@ const FirstFactorForm = function (props: Props) {
             focusPassword();
         }
     }, [
-        createErrorNotification,
-        focusPassword,
-        loginChannel,
+        username,
         password,
         props,
-        redirectionURL,
         rememberMe,
+        redirectionURL,
         requestMethod,
+        flowID,
+        flow,
+        subflow,
+        userCode,
+        loginChannel,
+        createErrorNotification,
         translate,
-        username,
-        workflow,
-        workflowID,
+        focusPassword,
     ]);
 
     const handleResetPasswordClick = () => {
@@ -264,10 +275,43 @@ const FirstFactorForm = function (props: Props) {
                             error={passwordError}
                             onChange={(v) => setPassword(v.target.value)}
                             onFocus={() => setPasswordError(false)}
-                            type="password"
+                            type={showPassword ? "text" : "password"}
                             autoComplete="current-password"
                             onKeyDown={handlePasswordKeyDown}
                             onKeyUp={handlePasswordKeyUp}
+                            slotProps={{
+                                input: {
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                            <IconButton
+                                                aria-label="toggle password visibility"
+                                                edge="end"
+                                                size="large"
+                                                onMouseDown={() => setShowPassword(true)}
+                                                onMouseUp={() => setShowPassword(false)}
+                                                onMouseLeave={() => setShowPassword(false)}
+                                                onTouchStart={() => setShowPassword(true)}
+                                                onTouchEnd={() => setShowPassword(false)}
+                                                onTouchCancel={() => setShowPassword(false)}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === " ") {
+                                                        setShowPassword(true);
+                                                        e.preventDefault();
+                                                    }
+                                                }}
+                                                onKeyUp={(e) => {
+                                                    if (e.key === " ") {
+                                                        setShowPassword(false);
+                                                        e.preventDefault();
+                                                    }
+                                                }}
+                                            >
+                                                {showPassword ? <Visibility /> : <VisibilityOff />}
+                                            </IconButton>
+                                        </InputAdornment>
+                                    ),
+                                },
+                            }}
                         />
                     </Grid>
                     {passwordCapsLock ? (
@@ -304,10 +348,10 @@ const FirstFactorForm = function (props: Props) {
                             id="sign-in-button"
                             variant="contained"
                             color="primary"
-                            fullWidth
+                            fullWidth={true}
+                            endIcon={loading ? <CircularProgress size={20} /> : null}
                             disabled={disabled}
                             onClick={handleSignIn}
-                            endIcon={loading ? <CircularProgress size={20} /> : null}
                         >
                             {translate("Sign in")}
                         </Button>

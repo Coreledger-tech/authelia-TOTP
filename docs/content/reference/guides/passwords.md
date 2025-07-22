@@ -2,7 +2,7 @@
 title: "Passwords"
 description: "A reference guide on passwords and hashing etc"
 summary: "This section contains reference documentation for Authelia."
-date: 2022-06-15T17:51:47+10:00
+date: 2024-03-14T06:00:14+11:00
 draft: false
 images: []
 weight: 220
@@ -215,7 +215,8 @@ The algorithm that a hash is utilizing is identifiable by its prefix:
 |   [Argon2]   | `argon2id` |   `$argon2id$`    |
 |   [Argon2]   | `argon2i`  |    `$argon2i$`    |
 |   [Argon2]   | `argon2d`  |    `$argon2d$`    |
-|   [Scrypt]   |    N/A     |    `$scrypt$`     |
+|   [Scrypt]   |  `scrypt`  |    `$scrypt$`     |
+|   [Scrypt]   | `yescrypt` |       `$y$`       |
 |   [PBKDF2]   |   `sha1`   |    `$pbkdf2$`     |
 |   [PBKDF2]   |  `sha224`  | `$pbkdf2-sha224$` |
 |   [PBKDF2]   |  `sha256`  | `$pbkdf2-sha256$` |

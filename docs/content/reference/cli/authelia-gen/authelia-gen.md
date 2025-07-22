@@ -2,7 +2,7 @@
 title: "authelia-gen"
 description: "Reference for the authelia-gen command."
 lead: ""
-date: 2022-06-15T17:51:47+10:00
+date: 2024-03-14T06:00:14+11:00
 draft: false
 images: []
 weight: 910
@@ -72,4 +72,5 @@ authelia-gen [flags]
 * [authelia-gen docs](authelia-gen_docs.md)	 - Generate docs
 * [authelia-gen github](authelia-gen_github.md)	 - Generate GitHub files
 * [authelia-gen locales](authelia-gen_locales.md)	 - Generate locales files
+* [authelia-gen misc](authelia-gen_misc.md)	 - Generate miscellaneous things
 

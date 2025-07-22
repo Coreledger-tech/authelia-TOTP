@@ -2,7 +2,7 @@
 title: "authelia"
 description: "Reference for the authelia command."
 lead: ""
-date: 2022-06-15T17:51:47+10:00
+date: 2024-03-14T06:00:14+11:00
 draft: false
 images: []
 weight: 900
@@ -55,6 +55,7 @@ authelia --config /etc/authelia/config/
 * [authelia build-info](authelia_build-info.md)	 - Show the build information of Authelia
 * [authelia config](authelia_config.md)	 - Perform config related actions
 * [authelia crypto](authelia_crypto.md)	 - Perform cryptographic operations
+* [authelia debug](authelia_debug.md)	 - Perform debug functions
 * [authelia storage](authelia_storage.md)	 - Manage the Authelia storage
 * [authelia validate-config](authelia_validate-config.md)	 - Check a configuration against the internal configuration validation mechanisms
 

@@ -1031,6 +1031,33 @@
         "bug",
         "test"
       ]
+    },
+    {
+      "login": "austonpramodh",
+      "name": "Auston Pramodh Barboza",
+      "avatar_url": "https://avatars.githubusercontent.com/u/5049050?v=4",
+      "profile": "http://auston.dev",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "ThomasSteinbach",
+      "name": "Thomas Steinbach",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1683246?v=4",
+      "profile": "https://github.com/ThomasSteinbach",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "Steve-Brule",
+      "name": "Steve-Brule",
+      "avatar_url": "https://avatars.githubusercontent.com/u/83868338?v=4",
+      "profile": "https://github.com/Steve-Brule",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,

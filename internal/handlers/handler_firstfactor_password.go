@@ -29,7 +29,6 @@ func FirstFactorPasswordPOST(delayFunc middlewares.TimingAttackDelayFunc) middle
 			details *authentication.UserDetails
 			err     error
 		)
-
 		if err = ctx.ParseBody(&bodyJSON); err != nil {
 			ctx.Logger.WithError(err).Errorf(logFmtErrParseRequestBody, regulation.AuthType1FA)
 
@@ -148,8 +147,8 @@ func FirstFactorPasswordPOST(delayFunc middlewares.TimingAttackDelayFunc) middle
 
 		successful = true
 
-		if bodyJSON.Workflow == workflowOpenIDConnect {
-			handleOIDCWorkflowResponse(ctx, &userSession, bodyJSON.WorkflowID)
+		if len(bodyJSON.Flow) > 0 {
+			handleFlowResponse(ctx, &userSession, bodyJSON.FlowID, bodyJSON.Flow, bodyJSON.SubFlow, bodyJSON.UserCode)
 		} else {
 			Handle1FAResponse(ctx, bodyJSON.TargetURL, bodyJSON.RequestMethod, userSession.Username, userSession.Groups)
 		}
@@ -171,7 +170,6 @@ func FirstFactorReauthenticatePOST(delayFunc middlewares.TimingAttackDelayFunc) 
 		bodyJSON := bodyFirstFactorReauthenticateRequest{}
 
 		var err error
-
 		if err = ctx.ParseBody(&bodyJSON); err != nil {
 			ctx.Logger.WithError(err).Errorf(logFmtErrParseRequestBody, regulation.AuthType1FA)
 
@@ -280,8 +278,8 @@ func FirstFactorReauthenticatePOST(delayFunc middlewares.TimingAttackDelayFunc) 
 
 		successful = true
 
-		if bodyJSON.Workflow == workflowOpenIDConnect {
-			handleOIDCWorkflowResponse(ctx, &userSession, bodyJSON.WorkflowID)
+		if len(bodyJSON.Flow) > 0 {
+			handleFlowResponse(ctx, &userSession, bodyJSON.FlowID, bodyJSON.Flow, bodyJSON.SubFlow, bodyJSON.UserCode)
 		} else {
 			Handle1FAResponse(ctx, bodyJSON.TargetURL, bodyJSON.RequestMethod, userSession.Username, userSession.Groups)
 		}

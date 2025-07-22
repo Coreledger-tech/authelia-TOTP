@@ -2,7 +2,7 @@
 title: "Measures"
 description: "An overview of the security measures Authelia implements."
 summary: "An overview of the security measures Authelia implements."
-date: 2018-08-26T23:46:15+02:00
+date: 2024-03-14T06:00:14+11:00
 draft: false
 images: []
 weight: 420
@@ -439,8 +439,8 @@ changes to take effect.
 Authelia will run as the root user and group by default, there are two options available to run as a non-root user and
 group.
 
-It is recommended which ever approach you take that to secure the sensitive files Authelia requires access to that you
-make sure the chmod of the files does not inadvertently allow read access to the files by users who do not need access
+It is recommended, which ever approach you take, in order to secure the sensitive files Authelia requires access to, that you
+make sure that the mode (chmod) of the files does not inadvertently allow read access to the files by users who do not need access
 to them.
 
 Examples:

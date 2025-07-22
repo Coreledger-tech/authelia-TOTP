@@ -1,14 +1,16 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
-import { Alert, AlertTitle, Button, CircularProgress, FormControl } from "@mui/material";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import { Alert, AlertTitle, Button, CircularProgress, FormControl, IconButton, InputAdornment } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import TextField from "@mui/material/TextField";
 import { useTranslation } from "react-i18next";
 
 import { RedirectionURL } from "@constants/SearchParams";
+import { useFlow } from "@hooks/Flow";
 import { useNotifications } from "@hooks/NotificationsContext";
 import { useQueryParam } from "@hooks/QueryParam";
-import { useWorkflow } from "@hooks/Workflow";
 import { IsCapsLockModified } from "@services/CapsLock";
 import { postSecondFactor } from "@services/Password";
 
@@ -18,16 +20,17 @@ export interface Props {
 
 const PasswordForm = function (props: Props) {
     const { createErrorNotification } = useNotifications();
-    const { t: translate } = useTranslation();
+    const { t: translate } = useTranslation(["portal", "settings"]);
 
     const redirectionURL = useQueryParam(RedirectionURL);
-    const [workflow, workflowID] = useWorkflow();
+    const { id: flowID, flow, subflow } = useFlow();
 
     const [loading, setLoading] = useState(false);
     const [password, setPassword] = useState("");
     const [passwordCapsLock, setPasswordCapsLock] = useState(false);
     const [passwordCapsLockPartial, setPasswordCapsLockPartial] = useState(false);
     const [passwordError, setPasswordError] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
 
     const passwordRef = useRef<HTMLInputElement | null>(null);
 
@@ -52,7 +55,7 @@ const PasswordForm = function (props: Props) {
         setLoading(true);
 
         try {
-            const res = await postSecondFactor(password, redirectionURL, workflow, workflowID);
+            const res = await postSecondFactor(password, redirectionURL, flowID, flow, subflow);
             props.onAuthenticationSuccess(res ? res.redirect : undefined);
         } catch (err) {
             console.error(err);
@@ -61,7 +64,7 @@ const PasswordForm = function (props: Props) {
             setLoading(false);
             focusPassword();
         }
-    }, [createErrorNotification, focusPassword, password, props, redirectionURL, translate, workflow, workflowID]);
+    }, [createErrorNotification, focusPassword, password, props, redirectionURL, translate, flowID, flow, subflow]);
 
     const handlePasswordKeyDown = useCallback(
         (event: React.KeyboardEvent<HTMLDivElement>) => {
@@ -116,10 +119,43 @@ const PasswordForm = function (props: Props) {
                         error={passwordError}
                         onChange={(v) => setPassword(v.target.value)}
                         onFocus={() => setPasswordError(false)}
-                        type="password"
+                        type={showPassword ? "text" : "password"}
                         autoComplete="current-password"
                         onKeyDown={handlePasswordKeyDown}
                         onKeyUp={handlePasswordKeyUp}
+                        slotProps={{
+                            input: {
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                        <IconButton
+                                            aria-label={translate("Toggle password visibility")}
+                                            edge="end"
+                                            size="large"
+                                            onMouseDown={() => setShowPassword(true)}
+                                            onMouseUp={() => setShowPassword(false)}
+                                            onMouseLeave={() => setShowPassword(false)}
+                                            onTouchStart={() => setShowPassword(true)}
+                                            onTouchEnd={() => setShowPassword(false)}
+                                            onTouchCancel={() => setShowPassword(false)}
+                                            onKeyDown={(e) => {
+                                                if (e.key === " ") {
+                                                    setShowPassword(true);
+                                                    e.preventDefault();
+                                                }
+                                            }}
+                                            onKeyUp={(e) => {
+                                                if (e.key === " ") {
+                                                    setShowPassword(false);
+                                                    e.preventDefault();
+                                                }
+                                            }}
+                                        >
+                                            {showPassword ? <Visibility /> : <VisibilityOff />}
+                                        </IconButton>
+                                    </InputAdornment>
+                                ),
+                            },
+                        }}
                     />
                 </Grid>
                 {passwordCapsLock ? (
@@ -137,12 +173,12 @@ const PasswordForm = function (props: Props) {
                         id="sign-in-button"
                         variant="contained"
                         color="primary"
-                        fullWidth
+                        fullWidth={true}
+                        endIcon={loading ? <CircularProgress size={20} /> : null}
                         disabled={loading}
                         onClick={handleSignIn}
-                        endIcon={loading ? <CircularProgress size={20} /> : null}
                     >
-                        {translate("Authenticate")}
+                        {translate("Authenticate", { ns: "settings" })}
                     </Button>
                 </Grid>
             </Grid>

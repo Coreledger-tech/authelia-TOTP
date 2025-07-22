@@ -130,19 +130,37 @@ identity_providers:
           - 'scope_name'
 ```
 
+#### Example Integrations
+
+The following integrations leverage all or part of the custom claims functionality:
+
+- [SFTPGo](sftpgo/index.md)
+
 ### Restore Functionality Prior to Claims Parameter
 
 The introduction of the claims parameter has removed most claims from the [ID Token] leaving it with only the claims
-required by the specification for additional privacy and performance. This may not work for some relying parties which
-do not make requests to the [UserInfo Endpoint] which must contain most or all claims, and they may additionally not
-support the claims parameter. While we recommend investigating if the relying party can support the [UserInfo Endpoint]
-for the purpose of obtaining claims this is not entirely possible in all situations due to projects that are no longer
-maintained or don't have developers with enough time to work on these things, for this reason we allow administrators
-to make adjustments to individual clients to work around this enhancement.
+required by the specification for additional privacy and performance. It should also be noted that
+[Requesting Claims using Scope Values](https://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims) is expressly
+expected to only make the claims available at the [UserInfo Endpoint]. This is because the Scope Values directly apply
+to the [Access Token] when the flow would result in one. At the time of this writing the only time an [Access Token]
+should not be returned while an [ID Token] is, is when using the Implicit Flow using the `response_type` value of
+`id_token`.
 
-The following example is a claims policy which restores that behaviour for those clients. Users may choose to expand
-on this on their own as they desire. This example also shows how to apply this policy to a client using the
-`claims_policy` option.
+This may not work for some relying parties which do not make requests to the [UserInfo Endpoint] which must contain most
+or all claims, and they may additionally not support the claims parameter. We strongly recommend investigating if the
+relying party can fix this bug on their end and add support the [UserInfo Endpoint] for the purpose of obtaining claims;
+as this is very clearly a bug on their end. If you're more interested in why this is a bug or would like to pass it on
+to the developers of the application you can see the [blog post](../../blog/technical-oidc-nuances) about it.
+
+However we acknowledge this is not entirely possible in all situations due to projects that are no longer maintained or
+don't have developers with enough time to work on these things, for this reason we allow administrators to make
+adjustments to individual clients to work around this enhancement.
+
+The following example is a claims policy which restores that behaviour for those broken clients. Users may choose to
+expand on this on their own as they desire. This example also shows how to apply this policy to a client using the
+`claims_policy` option. This example restores all of the claims which were previously incorrectly present within
+ID Tokens, it's recommended that users ascertain the exact claims necessary and only include those, adapting the example
+as necessary.
 
 We strongly recommend implementers use the standard process for obtaining the extra claims not generally intended to be
 included in the [ID Token] by using the [Access Token] to obtain them from the [UserInfo Endpoint]. This process is
@@ -155,7 +173,7 @@ identity_providers:
     claims_policies:
       ## Creates the 'default' claims policy.
       default:
-        id_token: ['groups', 'email', 'email_verified', 'alt_emails', 'preferred_username', 'name']
+        id_token: ['rat', 'groups', 'email', 'email_verified', 'alt_emails', 'preferred_username', 'name']
     clients:
       - client_id: 'client_example_id'
         ## Assigns the 'default' claims policy to this client.
@@ -170,8 +188,9 @@ administrators semi-granular control over which claims the client is entitled to
 
 ### openid
 
-This is the default scope for [OpenID Connect 1.0]. This field is forced on every client by the configuration validation
-that Authelia does.
+This scope implements specific functionality. Specifically it is the scope which enables [OpenID Connect 1.0] and
+the [OpenID Connect 1.0] specific semantics like returning an [ID Token], specific parameters that are only available
+in [OpenID Connect 1.0], etc.
 
 {{< callout context="caution" title="Important Note" icon="outline/alert-triangle" >}}
 The combination of the issuer (i.e. `iss`) [Claim](https://openid.net/specs/openid-connect-core-1_0.html#Claims) and
@@ -194,12 +213,12 @@ the [OpenID Connect 1.0](https://openid.net/connect/) specification.
 |    sub    | string(uuid)  |     opaque id      |    [ID Token]    |    A [RFC4122] UUID V4 linked to the user who logged in     |
 |    aud    | array[string] |       *N/A*        |    [ID Token]    |                          Audience                           |
 |    exp    |    number     |       *N/A*        |    [ID Token]    |                           Expires                           |
-|    iat    |    number     |       *N/A*        |    [ID Token]    |             The time when the token was issued              |
+|    iat    |    number     |       *N/A*        |    [ID Token]    |             The time when the token was minted              |
 | auth_time |    number     |       *N/A*        |    [ID Token]    |        The time the user authenticated with Authelia        |
-|    rat    |    number     |       *N/A*        |    [ID Token]    |            The time when the token was requested            |
 |   nonce   |    string     |       *N/A*        |    [ID Token]    |        The time the user authenticated with Authelia        |
 |    amr    | array[string] |       *N/A*        |    [ID Token]    | An [RFC8176] list of authentication method reference values |
 |    azp    |    string     |    id (client)     |    [ID Token]    |                    The authorized party                     |
+|    rat    |    number     |       *N/A*        |    [UserInfo]    |        The time when the authorization was requested        |
 |   scope   |    string     |       scopes       |    [UserInfo]    |              Granted scopes (space delimited)               |
 |    scp    | array[string] |       scopes       |    [UserInfo]    |                       Granted scopes                        |
 | client_id |    string     |    id (client)     |    [UserInfo]    |                        The client id                        |
@@ -208,17 +227,29 @@ the [OpenID Connect 1.0](https://openid.net/connect/) specification.
 
 This scope is a special scope designed to allow applications to obtain a [Refresh Token] which allows extended access to
 an application on behalf of a user. A [Refresh Token] is a special [Access Token] that allows refreshing previously
-issued token credentials, effectively it allows the Relying Party to obtain new tokens periodically.
+issued token credentials via the [Refresh Flow], effectively allowing the relying party to request that new tokens be
+periodically minted and granted.
 
 As per [OpenID Connect 1.0] Section 11 [Offline Access] can only be granted during the [Authorization Code Flow] or a
-[Hybrid Flow]. The [Refresh Token] will only ever be returned at the [Token Endpoint] when the client is exchanging
-their [OAuth 2.0 Authorization Code].
+As per [OpenID Connect 1.0] Section 11, [Offline Access] can only be granted during the [Authorization Code Flow] or a
+[Hybrid Flow]. The [Refresh Token] will only ever be returned by the [Token Endpoint] when all the following are
+true:
+1. The client is exchanging a [OAuth 2.0 Authorization Code].
+2. The client is permitted to request [Offline Access], i.e., it is explicitly configured with the `offline_access` scope.
+3. The client is permitted to use [Refresh Tokens] i.e. it is explicitly configured with the `refresh_token`
+   [Grant Type](introduction.md#grant-types).
+4. The resource owner has explicitly provided consent in one of the following scenarios:
+   1. During the process of completing the current flow.
+   2. During the process of completing a previous flow and requested that this decision is remembered, and the decision
+      is still relevant (i.e. not expired and matches the access level requested).
 
 Generally unless an application supports this and actively requests this scope they should not be granted this scope via
 the client configuration.
 
-It is also important to note that we treat a [Refresh Token] as single use and reissue a new [Refresh Token] during the
-refresh flow.
+It is also important to note that we treat a [Refresh Token] as single-use, and we mint and grant a new [Refresh Token]
+during the [Refresh Flow] (i.e., [Refresh Token] Rotation). This aligns with the
+[Refresh Token Protection](https://datatracker.ietf.org/doc/html/rfc9700#refresh_token_protection) recommendations
+from [RFC9700].
 
 ### profile
 
@@ -229,7 +260,7 @@ This scope allows the client to access the profile information the authenticatio
 |        name        |  string  |    display_name    |    [UserInfo]    |          The users display name          |
 |    family_name     |  string  |    family_name     |    [UserInfo]    |          The users family name           |
 |     given_name     |  string  |     given_name     |    [UserInfo]    |           The users given name           |
-|    	middle_name    |  string  |    	middle_name    |    [UserInfo]    |          The users middle name           |
+|    middle_name     |  string  |    middle_name     |    [UserInfo]    |          The users middle name           |
 |      nickname      |  string  |      nickname      |    [UserInfo]    |            The users nickname            |
 | preferred_username |  string  |      username      |    [UserInfo]    | The username the user used to login with |
 |      profile       |  string  |      profile       |    [UserInfo]    |          The users profile URL           |
@@ -307,6 +338,7 @@ guide.
 [ID Token]: https://openid.net/specs/openid-connect-core-1_0.html#IDToken
 [Access Token]: https://datatracker.ietf.org/doc/html/rfc6749#section-1.4
 [Refresh Token]: https://openid.net/specs/openid-connect-core-1_0.html#RefreshTokens
+[Refresh Tokens]: https://openid.net/specs/openid-connect-core-1_0.html#RefreshTokens
 
 [Claims]: https://openid.net/specs/openid-connect-core-1_0.html#Claims
 [Standard Claims]: https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims
@@ -319,6 +351,7 @@ guide.
 
 [Authorization Code Flow]: https://openid.net/specs/openid-connect-core-1_0.html#CodeFlowAuth
 [Hybrid Flow]: https://openid.net/specs/openid-connect-core-1_0.html#HybridFlowAuth
+[Refresh Flow]: https://datatracker.ietf.org/doc/html/rfc6749#section-1.5
 
 [Token Endpoint]: https://openid.net/specs/openid-connect-core-1_0.html#TokenEndpoint
 [UserInfo]: https://openid.net/specs/openid-connect-core-1_0.html#UserInfo
@@ -327,3 +360,4 @@ guide.
 [RFC8176]: https://datatracker.ietf.org/doc/html/rfc8176
 
 [OAuth 2.0 Authorization Code]: https://datatracker.ietf.org/doc/html/rfc6749#section-1.3.1
+[RFC9700]: https://datatracker.ietf.org/doc/html/rfc9700/

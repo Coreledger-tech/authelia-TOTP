@@ -2,7 +2,7 @@
 title: "Trusted Header SSO"
 description: "Trusted Header SSO Integration"
 summary: "An introduction into integrating Authelia with an application which implements authentication via trusted headers."
-date: 2022-06-15T17:51:47+10:00
+date: 2024-03-14T06:00:14+11:00
 draft: false
 images: []
 weight: 410
@@ -38,15 +38,17 @@ however it can vary depending on how the application decides to do this.
 
 ## Response Headers
 
-The following table represents the response headers that Authelia's `/api/verify` endpoint returns which can be
-forwarded over a trusted network via the reverse proxy when using the forward authentication flow.
+The following table represents the response headers that Authelia's `/api/authz/*` or `/api/verify` endpoints return
+which can be forwarded over a trusted network via the reverse proxy when using the forward authentication flow. See
+the [Server Authz Endpoints](../../configuration/miscellaneous/server-endpoints-authz.md) configuration documentation
+and linked reference articles for more information on these endpoints.
 
-|    Header     |      Description / Notes       |                  Example                   |
-|:-------------:|:------------------------------:|:------------------------------------------:|
-|  Remote-User  |       The users username       |                    john                    |
-| Remote-Groups | The groups the user belongs to |                 admin,dev                  |
-|  Remote-Name  |     The users display name     |                 John Smith                 |
-| Remote-Email  |    The users email address     |      jsmith@{{< sitevar name="domain" nojs="example.com" >}}       |
+|    Header     |      Description / Notes       |                         Example                         |
+|:-------------:|:------------------------------:|:-------------------------------------------------------:|
+|  Remote-User  |       The users username       |                          john                           |
+| Remote-Groups | The groups the user belongs to |                        admin,dev                        |
+|  Remote-Name  |     The users display name     |                       John Smith                        |
+| Remote-Email  |    The users email address     | jsmith@{{< sitevar name="domain" nojs="example.com" >}} |
 
 ## Forwarding the Response Headers
 

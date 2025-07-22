@@ -8,9 +8,12 @@ import (
 
 	"github.com/authelia/authelia/v4/internal/configuration/schema"
 	"github.com/authelia/authelia/v4/internal/utils"
+	"github.com/authelia/authelia/v4/internal/webauthn"
 )
 
-// ValidateWebAuthn validates and update WebAuthn configuration.
+// ValidateWebAuthn validates and updates WebAuthn configuration.
+//
+//nolint:gocyclo
 func ValidateWebAuthn(config *schema.Configuration, validator *schema.StructValidator) {
 	if config.WebAuthn.DisplayName == "" {
 		config.WebAuthn.DisplayName = schema.DefaultWebAuthnConfiguration.DisplayName
@@ -18,6 +21,29 @@ func ValidateWebAuthn(config *schema.Configuration, validator *schema.StructVali
 
 	if config.WebAuthn.Timeout <= 0 {
 		config.WebAuthn.Timeout = schema.DefaultWebAuthnConfiguration.Timeout
+	}
+
+	if config.WebAuthn.EnablePasskeyLogin {
+		if config.WebAuthn.Disable {
+			validator.Push(fmt.Errorf(errFmtWebAuthnBoolean, "enable_passkey_login", config.WebAuthn.EnablePasskeyLogin, false, "disable", config.WebAuthn.Disable))
+		}
+	} else {
+		if config.WebAuthn.EnablePasskey2FA {
+			validator.Push(fmt.Errorf(errFmtWebAuthnBoolean, "experimental_enable_passkey_uv_two_factors", config.WebAuthn.EnablePasskey2FA, false, "enable_passkey_login", config.WebAuthn.EnablePasskeyLogin))
+		}
+
+		if config.WebAuthn.EnablePasskeyUpgrade {
+			validator.Push(fmt.Errorf(errFmtWebAuthnBoolean, "experimental_enable_passkey_upgrade", config.WebAuthn.EnablePasskeyUpgrade, false, "enable_passkey_login", config.WebAuthn.EnablePasskeyLogin))
+		}
+	}
+
+	if config.WebAuthn.Metadata.Enabled {
+		switch config.WebAuthn.Metadata.CachePolicy {
+		case webauthn.CachePolicyStrict, webauthn.CachePolicyRelaxed:
+			break
+		default:
+			validator.Push(fmt.Errorf(errFmtWebAuthnMetadataString, "cache_policy", config.WebAuthn.Metadata.CachePolicy, utils.StringJoinOr([]string{webauthn.CachePolicyStrict, webauthn.CachePolicyRelaxed})))
+		}
 	}
 
 	switch {

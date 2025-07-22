@@ -2,7 +2,7 @@
 title: "About"
 description: "About Authelia and the Authelia Team"
 summary: ""
-date: 2023-03-19T16:29:12+10:00
+date: 2024-03-14T06:00:14+11:00
 draft: false
 images: []
 toc: true
@@ -17,8 +17,6 @@ seo:
 ---
 
 ## What is Authelia?
-
-{{< sitevar name="domain" nojs="example.com" >}}
 
 Authelia is a project with several open source developers who contribute to the project in their free time. We are not
 a company or another type of incorporated entity, and do not have any monetization model. Individuals and Organizations

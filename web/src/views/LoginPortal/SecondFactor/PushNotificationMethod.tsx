@@ -8,9 +8,10 @@ import FailureIcon from "@components/FailureIcon";
 import PushNotificationIcon from "@components/PushNotificationIcon";
 import SuccessIcon from "@components/SuccessIcon";
 import { RedirectionURL } from "@constants/SearchParams";
+import { useFlow } from "@hooks/Flow";
 import { useIsMountedRef } from "@hooks/Mounted";
+import { useUserCode } from "@hooks/OpenIDConnect";
 import { useQueryParam } from "@hooks/QueryParam";
-import { useWorkflow } from "@hooks/Workflow";
 import {
     DuoDevicePostRequest,
     completeDuoDeviceSelectionProcess,
@@ -48,9 +49,11 @@ const PushNotificationMethod = function (props: Props) {
     const { t: translate } = useTranslation();
     const { classes } = useStyles();
 
+    const { id: flowID, flow, subflow } = useFlow();
+    const userCode = useUserCode();
+
     const [state, setState] = useState(State.SignInInProgress);
     const redirectionURL = useQueryParam(RedirectionURL);
-    const [workflow, workflowID] = useWorkflow();
     const mounted = useIsMountedRef();
     const [enroll_url, setEnrollUrl] = useState("");
     const [devices, setDevices] = useState([] as SelectableDevice[]);
@@ -126,7 +129,7 @@ const PushNotificationMethod = function (props: Props) {
 
         try {
             setState(State.SignInInProgress);
-            const res = await completePushNotificationSignIn(redirectionURL, workflow, workflowID);
+            const res = await completePushNotificationSignIn(redirectionURL, flowID, flow, subflow, userCode);
             // If the request was initiated and the user changed 2FA method in the meantime,
             // the process is interrupted to avoid updating state of unmounted component.
             if (!mounted.current) return;
@@ -183,8 +186,10 @@ const PushNotificationMethod = function (props: Props) {
         props.authenticationLevel,
         props.duoSelfEnrollment,
         redirectionURL,
-        workflow,
-        workflowID,
+        flowID,
+        flow,
+        subflow,
+        userCode,
         mounted,
         onSignInErrorCallback,
         translate,

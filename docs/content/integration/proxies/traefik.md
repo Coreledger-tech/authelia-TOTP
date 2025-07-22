@@ -2,7 +2,7 @@
 title: "Traefik"
 description: "An integration guide for Authelia and the Traefik reverse proxy"
 summary: "A guide on integrating Authelia with the Traefik reverse proxy."
-date: 2022-06-15T17:51:47+10:00
+date: 2024-03-14T06:00:14+11:00
 draft: false
 images: []
 weight: 370
@@ -525,6 +525,11 @@ http:
         - '/certificates/ca.public.crt'
 ...
 ```
+
+## Kubernetes
+
+Authelia supports some of the [Traefik] based Kubernetes Ingress. See the
+[Kubernetes Integration Guide](../kubernetes/traefik-ingress.md) for more information.
 
 ## Frequently Asked Questions
 

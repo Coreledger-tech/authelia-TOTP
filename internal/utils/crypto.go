@@ -343,7 +343,6 @@ func NewTLSConfig(config *schema.TLS, rootCAs *x509.CertPool) (tlsConfig *tls.Co
 // NewX509CertPool generates a x509.CertPool from the system PKI and the directory specified.
 func NewX509CertPool(directory string) (certPool *x509.CertPool, warnings []error, errors []error) {
 	var err error
-
 	if certPool, err = x509.SystemCertPool(); err != nil {
 		warnings = append(warnings, fmt.Errorf("could not load system certificate pool which may result in untrusted certificate issues: %v", err))
 		certPool = x509.NewCertPool()
@@ -720,4 +719,49 @@ func TLSVersionFromBytesString(input string) (version int, err error) {
 	default:
 		return -1, fmt.Errorf("tls version 0x%x is unknown", version)
 	}
+}
+
+func IsInsecureCipherSuite(cipherSuite uint16) bool {
+	for _, suite := range tls.InsecureCipherSuites() {
+		if suite.ID == cipherSuite {
+			return true
+		}
+	}
+
+	return false
+}
+
+// UnsafeGetIntermediatesFromPeerCertificates attempts to find valid intermediates from the provided peer certificates.
+//
+// CRITICAL: This function should not be used for production code as it may not produce the correct output to properly
+// verify the chain. This function is intended to be used for testing purposes only.
+func UnsafeGetIntermediatesFromPeerCertificates(certs []*x509.Certificate, roots, ints *x509.CertPool) (intermediates *x509.CertPool) {
+	var err error
+
+	n := len(certs) - 1
+
+	opts := x509.VerifyOptions{
+		Roots:         roots.Clone(),
+		Intermediates: ints.Clone(),
+	}
+
+	for i := n; i >= 0; i-- {
+		if _, err = certs[i].Verify(opts); err == nil {
+			continue
+		}
+
+		if i == n {
+			// No certs in the chain are valid.
+			break
+		}
+
+		// Intentionally only add the certificates within the trust chain.
+		if certs[i+1].IsCA {
+			if _, err = certs[i+1].Verify(opts); err == nil {
+				opts.Intermediates.AddCert(certs[i+1])
+			}
+		}
+	}
+
+	return opts.Intermediates
 }

@@ -2,7 +2,7 @@
 title: "Telemetry"
 description: "A reference guide on the telemetry collection"
 summary: "This section contains reference documentation for Authelia's telemetry systems."
-date: 2022-06-15T17:51:47+10:00
+date: 2024-03-14T06:00:14+11:00
 draft: false
 images: []
 weight: 220
@@ -87,6 +87,7 @@ The endpoint name.
 
 OpenID Connect 1.0 Endpoint Names:
 
+- consent
 - authorization
 - pushed_authorization_request
 - token

@@ -2,14 +2,14 @@
 title: "Say hello to the new website 👋"
 description: "Introducing the new website"
 summary: "Introducing the new website"
-date: 2022-06-15T17:51:47+10:00
+date: 2024-03-14T06:00:14+11:00
 draft: false
 weight: 50
 categories: ["News"]
 tags: ["website"]
 contributors: ["James Elliott"]
 pinned: false
-homepage: false
+homepage: true
 seo:
   title: "" # custom title (optional)
   description: "" # custom description (recommended)

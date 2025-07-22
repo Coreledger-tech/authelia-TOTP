@@ -11,11 +11,7 @@ import (
 )
 
 func NewUserAttributes(config *schema.Configuration) (ua UserAttributeResolver) {
-	if config == nil {
-		return &UserAttributes{}
-	}
-
-	if len(config.Definitions.UserAttributes) == 0 {
+	if config == nil || len(config.Definitions.UserAttributes) == 0 {
 		return &UserAttributes{}
 	}
 
@@ -236,7 +232,6 @@ func (e *UserAttributesExpressions) Resolve(name string, detailer UserDetailer, 
 			val ref.Val
 			err error
 		)
-
 		if val, _, err = program.Eval(activation); err != nil {
 			return nil, false
 		}

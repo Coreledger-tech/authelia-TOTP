@@ -2,7 +2,7 @@
 title: "Tailscale"
 description: "Integrating Tailscale with the Authelia OpenID Connect 1.0 Provider."
 summary: ""
-date: 2023-04-23T10:06:28+10:00
+date: 2024-03-14T06:00:14+11:00
 draft: false
 images: []
 weight: 620
@@ -13,17 +13,17 @@ support:
   integration: true
 seo:
   title: "" # custom title (optional)
-  description: "" # custom description (recommended)
+  description: "Step-by-step guide to configuring Tailscale with OpenID Connect 1.0 for secure SSO. Enhance your login flow using Authelia’s modern identity management."
   canonical: "" # custom canonical URL (optional)
   noindex: false # false (default) or true
 ---
 
 ## Tested Versions
 
-* [Authelia]
-  * [v4.38.0](https://github.com/authelia/authelia/releases/tag/v4.38.0)
-* [Tailscale]
-  * [1.38.4](https://github.com/tailscale/tailscale/releases/tag/v1.38.4)
+- [Authelia]
+  - [v4.38.0](https://github.com/authelia/authelia/releases/tag/v4.38.0)
+- [Tailscale]
+  - [v1.38.4](https://github.com/tailscale/tailscale/releases/tag/v1.38.4)
 
 {{% oidc-common %}}
 
@@ -31,11 +31,11 @@ seo:
 
 This example makes the following assumptions:
 
-* __Domain Root URL:__ `https://{{< sitevar name="domain" nojs="example.com" >}}`
-* __Authelia Root URL:__ `https://{{< sitevar name="subdomain-authelia" nojs="auth" >}}.{{< sitevar name="domain" nojs="example.com" >}}/`
-* __Authelia Account:__ `user@{{< sitevar name="domain" nojs="example.com" >}}`
-* __Client ID:__ `tailscale`
-* __Client Secret:__ `insecure_secret`
+- __Domain Root URL:__ `https://{{< sitevar name="domain" nojs="example.com" >}}`
+- __Authelia Root URL:__ `https://{{< sitevar name="subdomain-authelia" nojs="auth" >}}.{{< sitevar name="domain" nojs="example.com" >}}/`
+- __Authelia Account:__ `user@{{< sitevar name="domain" nojs="example.com" >}}`
+- __Client ID:__ `tailscale`
+- __Client Secret:__ `insecure_secret`
 
 Some of the values presented in this guide can automatically be replaced with documentation variables.
 
@@ -57,12 +57,23 @@ identity_providers:
       - client_id: 'tailscale'
         client_name: 'Tailscale'
         client_secret: '$pbkdf2-sha512$310000$c8p78n7pUMln0jzvd4aK4Q$JNRBzwAo0ek5qKn50cFzzvE9RXV88h1wJn5KGiHrD0YKtZaR/nCb2CJPOsKaPK0hjf.9yHxzQGZziziccp6Yng'  # The digest of 'insecure_secret'.
+        public: false
+        authorization_policy: 'two_factor'
+        require_pkce: false
+        pkce_challenge_method: ''
         redirect_uris:
           - 'https://login.tailscale.com/a/oauth_response'
         scopes:
           - 'openid'
           - 'email'
           - 'profile'
+        response_types:
+          - 'code'
+        grant_types:
+          - 'authorization_code'
+        access_token_signed_response_alg: 'none'
+        userinfo_signed_response_alg: 'none'
+        token_endpoint_auth_method: 'client_secret_basic'
 ```
 
 ### Application

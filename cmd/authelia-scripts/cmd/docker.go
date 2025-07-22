@@ -77,15 +77,15 @@ func newDockerPushManifestCmd() (cmd *cobra.Command) {
 func cmdDockerBuildRun(_ *cobra.Command, _ []string) {
 	log.Infof("Building Docker image %s...", DockerImageName)
 	checkContainerIsSupported(container)
-	err := dockerBuildOfficialImage(container)
 
+	err := dockerBuildOfficialImage(container)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	docker := &Docker{}
-	err = docker.Tag(IntermediateDockerImageName, DockerImageName)
 
+	err = docker.Tag(IntermediateDockerImageName, DockerImageName)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -174,8 +174,8 @@ func login(docker *Docker, registry string) {
 	}
 
 	log.Infof("Login to %s as %s", registry, username)
-	err := docker.Login(username, password, registry)
 
+	err := docker.Login(username, password, registry)
 	if err != nil {
 		log.Fatalf("Login to %s failed: %s", registry, err)
 	}

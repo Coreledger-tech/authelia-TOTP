@@ -13,17 +13,17 @@ support:
   integration: true
 seo:
   title: "" # custom title (optional)
-  description: "" # custom description (recommended)
+  description: "Step-by-step guide to configuring Mealie with OpenID Connect 1.0 for secure SSO. Enhance your login flow using Authelia’s modern identity management."
   canonical: "" # custom canonical URL (optional)
   noindex: false # false (default) or true
 ---
 
 ## Tested Versions
 
-* [Authelia]
-  * [v4.38.0](https://github.com/authelia/authelia/releases/tag/v4.38.0)
-* [Mealie]
-  * [v2.0.0](https://github.com/mealie-recipes/mealie/releases/tag/v2.0.0)
+- [Authelia]
+  - [v4.38.0](https://github.com/authelia/authelia/releases/tag/v4.38.0)
+- [Mealie]
+  - [v2.0.0](https://github.com/mealie-recipes/mealie/releases/tag/v2.0.0)
 
 {{% oidc-common %}}
 
@@ -31,9 +31,9 @@ seo:
 
 This example makes the following assumptions:
 
-* __Application Root URL:__ `https://mealie.{{< sitevar name="domain" nojs="example.com" >}}/`
-* __Authelia Root URL:__ `https://{{< sitevar name="subdomain-authelia" nojs="auth" >}}.{{< sitevar name="domain" nojs="example.com" >}}/`
-* __Client ID:__ `mealie`
+- __Application Root URL:__ `https://mealie.{{< sitevar name="domain" nojs="example.com" >}}/`
+- __Authelia Root URL:__ `https://{{< sitevar name="subdomain-authelia" nojs="auth" >}}.{{< sitevar name="domain" nojs="example.com" >}}/`
+- __Client ID:__ `mealie`
 
 Some of the values presented in this guide can automatically be replaced with documentation variables.
 
@@ -66,7 +66,13 @@ identity_providers:
           - 'email'
           - 'profile'
           - 'groups'
+        response_types:
+          - 'code'
+        grant_types:
+          - 'authorization_code'
+        access_token_signed_response_alg: 'none'
         userinfo_signed_response_alg: 'none'
+        token_endpoint_auth_method: 'client_secret_basic'
 ```
 
 ### Application
@@ -79,9 +85,15 @@ authorization policy in [provider authorization policies](../../../configuration
 [client authorization policy](./../../configuration/identity-providers/openid-connect/clients.md#authorization_policy).
 {{< /callout >}}
 
-To configure [Mealie] to utilize Authelia as an [OpenID Connect 1.0] Provider use the following environment variables:
+To configure [Mealie] there is one method, using [Environment Variables](#environment-variables).
 
-```env
+#### Environment Variables
+
+To configure [Mealie] to utilize Authelia as an [OpenID Connect 1.0] Provider, use the following environment variables:
+
+##### Standard
+
+```shell {title=".env"}
 OIDC_AUTH_ENABLED=true
 OIDC_SIGNUP_ENABLED=true
 OIDC_CONFIGURATION_URL=https://{{< sitevar name="subdomain-authelia" nojs="auth" >}}.{{< sitevar name="domain" nojs="example.com" >}}/.well-known/openid-configuration
@@ -90,6 +102,22 @@ OIDC_CLIENT_SECRET=insecure_secret
 OIDC_AUTO_REDIRECT=false
 OIDC_ADMIN_GROUP=mealie-admins
 OIDC_USER_GROUP=mealie-users
+```
+
+##### Docker Compose
+
+```yaml {title="compose.yml"}
+services:
+  mealie:
+    environment:
+      OIDC_AUTH_ENABLED: 'true'
+      OIDC_SIGNUP_ENABLED: 'true'
+      OIDC_CONFIGURATION_URL: 'https://{{< sitevar name="subdomain-authelia" nojs="auth" >}}.{{< sitevar name="domain" nojs="example.com" >}}/.well-known/openid-configuration'
+      OIDC_CLIENT_ID: 'mealie'
+      OIDC_CLIENT_SECRET: 'insecure_secret'
+      OIDC_AUTO_REDIRECT: 'false'
+      OIDC_ADMIN_GROUP: 'mealie-admins'
+      OIDC_USER_GROUP: 'mealie-users'
 ```
 
 ## See Also

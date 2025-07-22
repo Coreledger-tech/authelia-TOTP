@@ -2,7 +2,7 @@
 title: "Apache Guacamole"
 description: "Integrating Apache Guacamole with the Authelia OpenID Connect 1.0 Provider."
 summary: ""
-date: 2022-07-31T13:09:05+10:00
+date: 2024-03-14T06:00:14+11:00
 draft: false
 images: []
 weight: 620
@@ -13,17 +13,17 @@ support:
   integration: true
 seo:
   title: "" # custom title (optional)
-  description: "" # custom description (recommended)
+  description: "Step-by-step guide to configuring Apache Guacamole with OpenID Connect 1.0 for secure SSO. Enhance your login flow using Authelia’s modern identity management."
   canonical: "" # custom canonical URL (optional)
   noindex: false # false (default) or true
 ---
 
 ## Tested Versions
 
-* [Authelia]
-  * [v4.38.0](https://github.com/authelia/authelia/releases/tag/v4.38.0)
-* [Apache Guacamole]
-  * __UNKNOWN__
+- [Authelia]
+  - [v4.39.5](https://github.com/authelia/authelia/releases/tag/v4.39.5)
+- [Apache Guacamole]
+  - [v1.5.5](https://guacamole.apache.org/releases/1.5.5/)
 
 {{% oidc-common %}}
 
@@ -31,10 +31,9 @@ seo:
 
 This example makes the following assumptions:
 
-* __Application Root URL:__ `https://guacamole.{{< sitevar name="domain" nojs="example.com" >}}/`
-* __Authelia Root URL:__ `https://{{< sitevar name="subdomain-authelia" nojs="auth" >}}.{{< sitevar name="domain" nojs="example.com" >}}/`
-* __Client ID:__ `guacamole`
-* __Client Secret:__ `insecure_secret`
+- __Application Root URL:__ `https://guacamole.{{< sitevar name="domain" nojs="example.com" >}}/`
+- __Authelia Root URL:__ `https://{{< sitevar name="subdomain-authelia" nojs="auth" >}}.{{< sitevar name="domain" nojs="example.com" >}}/`
+- __Client ID:__ `guacamole`
 
 Some of the values presented in this guide can automatically be replaced with documentation variables.
 
@@ -43,6 +42,12 @@ Some of the values presented in this guide can automatically be replaced with do
 ## Configuration
 
 ### Authelia
+
+{{< callout context="caution" title="Important Note" icon="outline/alert-triangle" >}}
+At the time of this writing this third party client has a bug and does not support [OpenID Connect 1.0](https://openid.net/specs/openid-connect-core-1_0.html). This
+configuration will likely require configuration of an escape hatch to work around the bug on their end. See
+[Configuration Escape Hatch](#configuration-escape-hatch) for details.
+{{< /callout >}}
 
 The following YAML configuration is an example __Authelia__ [client configuration] for use with [Apache Guacamole] which
 will operate with the application example:
@@ -55,9 +60,10 @@ identity_providers:
     clients:
       - client_id: 'guacamole'
         client_name: 'Apache Guacamole'
-        client_secret: '$pbkdf2-sha512$310000$c8p78n7pUMln0jzvd4aK4Q$JNRBzwAo0ek5qKn50cFzzvE9RXV88h1wJn5KGiHrD0YKtZaR/nCb2CJPOsKaPK0hjf.9yHxzQGZziziccp6Yng'  # The digest of 'insecure_secret'.
-        public: false
+        public: true
         authorization_policy: 'two_factor'
+        require_pkce: false
+        pkce_challenge_method: ''
         redirect_uris:
           - 'https://guacamole.{{< sitevar name="domain" nojs="example.com" >}}'
         scopes:
@@ -69,12 +75,22 @@ identity_providers:
           - 'id_token'
         grant_types:
           - 'implicit'
+        access_token_signed_response_alg: 'none'
         userinfo_signed_response_alg: 'none'
+        token_endpoint_auth_method: 'client_secret_basic'
 ```
 
 ### Application
 
-To configure [Apache Guacamole] to utilize Authelia as an [OpenID Connect 1.0] Provider use the following configuration:
+Before configuring or using [OpenID Connect 1.0] with [Apache Guacamole] you must ensure the
+[openid extension](https://guacamole.apache.org/doc/gug/openid-auth.html#installing-support-for-openid-connect) is
+installed.
+
+To configure [Apache Guacamole]  there is one method, using the [Configuration File](#configuration-file).
+
+#### Configuration File
+
+To configure [Apache Guacamole] to utilize Authelia as an [OpenID Connect 1.0] Provider, use the following configuration:
 
 ```yaml
 openid-client-id: guacamole
@@ -89,7 +105,7 @@ openid-groups-claim-type: groups
 
 ## See Also
 
-* [Apache Guacamole OpenID Connect Authentication Documentation](https://guacamole.apache.org/doc/gug/openid-auth.html)
+- [Apache Guacamole OpenID Connect Authentication Documentation](https://guacamole.apache.org/doc/gug/openid-auth.html)
 
 [Authelia]: https://www.authelia.com
 [Apache Guacamole]: https://guacamole.apache.org/

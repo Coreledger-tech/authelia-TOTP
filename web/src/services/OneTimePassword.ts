@@ -9,16 +9,27 @@ import { SignInResponse } from "@services/SignIn";
 interface CompleteTOTPSignInBody {
     token: string;
     targetURL?: string;
-    workflow?: string;
-    workflowID?: string;
+    flowID?: string;
+    flow?: string;
+    subflow?: string;
+    userCode?: string;
 }
 
-export function completeTOTPSignIn(passcode: string, targetURL?: string, workflow?: string, workflowID?: string) {
+export function completeTOTPSignIn(
+    passcode: string,
+    targetURL?: string,
+    flowID?: string,
+    flow?: string,
+    subflow?: string,
+    userCode?: string,
+) {
     const body: CompleteTOTPSignInBody = {
         token: `${passcode}`,
-        targetURL: targetURL,
-        workflow: workflow,
-        workflowID: workflowID,
+        targetURL,
+        flowID,
+        flow,
+        subflow,
+        userCode,
     };
 
     return PostWithOptionalResponseRateLimited<SignInResponse>(CompleteTOTPSignInPath, body);

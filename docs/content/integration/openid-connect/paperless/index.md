@@ -13,17 +13,17 @@ support:
   integration: true
 seo:
   title: "" # custom title (optional)
-  description: "" # custom description (recommended)
+  description: "Step-by-step guide to configuring Paperless with OpenID Connect 1.0 for secure SSO. Enhance your login flow using Authelia’s modern identity management."
   canonical: "" # custom canonical URL (optional)
   noindex: false # false (default) or true
 ---
 
 ## Tested Versions
 
-* [Authelia]
-  * [v4.38.17](https://github.com/authelia/authelia/releases/tag/v4.38.17)
-* [Paperless]
-  * [v2.13.5](https://github.com/paperless-ngx/paperless-ngx/releases/tag/v2.13.5)
+- [Authelia]
+  - [v4.38.17](https://github.com/authelia/authelia/releases/tag/v4.38.17)
+- [Paperless]
+  - [v2.13.5](https://github.com/paperless-ngx/paperless-ngx/releases/tag/v2.13.5)
 
 {{% oidc-common %}}
 
@@ -31,10 +31,10 @@ seo:
 
 This example makes the following assumptions:
 
-* __Application Root URL:__ `https://paperless.{{< sitevar name="domain" nojs="example.com" >}}/`
-* __Authelia Root URL:__ `https://{{< sitevar name="subdomain-authelia" nojs="auth" >}}.{{< sitevar name="domain" nojs="example.com" >}}/`
-* __Client ID:__ `paperless`
-* __Client Secret:__ `insecure_secret`
+- __Application Root URL:__ `https://paperless.{{< sitevar name="domain" nojs="example.com" >}}/`
+- __Authelia Root URL:__ `https://{{< sitevar name="subdomain-authelia" nojs="auth" >}}.{{< sitevar name="domain" nojs="example.com" >}}/`
+- __Client ID:__ `paperless`
+- __Client Secret:__ `insecure_secret`
 
 Some of the values presented in this guide can automatically be replaced with documentation variables.
 
@@ -67,22 +67,23 @@ identity_providers:
           - 'profile'
           - 'email'
           - 'groups'
+        response_types:
+          - 'code'
+        grant_types:
+          - 'authorization_code'
+        access_token_signed_response_alg: 'none'
         userinfo_signed_response_alg: 'none'
         token_endpoint_auth_method: 'client_secret_basic'
 ```
 
 ### Application
 
-To configure [Paperless] to utilize Authelia as an [OpenID Connect 1.0] Provider:
+To configure [Paperless] there is one method, using the [Environment Variables](#environment-variables).
 
-1. Set the following environment variables:
+#### Environment Variables
 
-```env
-PAPERLESS_APPS=allauth.socialaccount.providers.openid_connect
-PAPERLESS_SOCIALACCOUNT_PROVIDERS={"openid_connect":{"SCOPE":["openid","profile","email"],"OAUTH_PKCE_ENABLED":true,"APPS":[{"provider_id":"authelia","name":"Authelia","client_id":"paperless","secret":"insecure_secret","settings":{"server_url":"https://{{< sitevar name="subdomain-authelia" nojs="auth" >}}.{{< sitevar name="domain" nojs="example.com" >}}","token_auth_method":"client_secret_basic"}}]}}
-```
-
-The `PAPERLESS_SOCIALACCOUNT_PROVIDERS` environment variable is the minified version of the following:
+For reference purposes, the below `PAPERLESS_SOCIALACCOUNT_PROVIDERS` environment variable examples are the minified
+format of the following:
 
 ```json
 {
@@ -103,6 +104,25 @@ The `PAPERLESS_SOCIALACCOUNT_PROVIDERS` environment variable is the minified ver
     ]
   }
 }
+```
+
+To configure [Paperless] to utilize Authelia as an [OpenID Connect 1.0] Provider, use the following environment variables:
+
+##### Standard
+
+```shell {title=".env"}
+PAPERLESS_APPS=allauth.socialaccount.providers.openid_connect
+PAPERLESS_SOCIALACCOUNT_PROVIDERS={"openid_connect":{"SCOPE":["openid","profile","email"],"OAUTH_PKCE_ENABLED":true,"APPS":[{"provider_id":"authelia","name":"Authelia","client_id":"paperless","secret":"insecure_secret","settings":{"server_url":"https://{{< sitevar name="subdomain-authelia" nojs="auth" >}}.{{< sitevar name="domain" nojs="example.com" >}}","token_auth_method":"client_secret_basic"}}]}}
+```
+
+##### Docker Compose
+
+```yaml {title="compose.yml"}
+services:
+  paperless:
+    environment:
+      PAPERLESS_APPS: 'allauth.socialaccount.providers.openid_connect'
+      PAPERLESS_SOCIALACCOUNT_PROVIDERS: '{"openid_connect":{"SCOPE":["openid","profile","email"],"OAUTH_PKCE_ENABLED":true,"APPS":[{"provider_id":"authelia","name":"Authelia","client_id":"paperless","secret":"insecure_secret","settings":{"server_url":"https://{{< sitevar name="subdomain-authelia" nojs="auth" >}}.{{< sitevar name="domain" nojs="example.com" >}}","token_auth_method":"client_secret_basic"}}]}}'
 ```
 
 ## See Also

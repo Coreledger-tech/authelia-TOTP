@@ -2,7 +2,7 @@
 title: "PostgreSQL"
 description: "PostgreSQL Configuration"
 summary: "The PostgreSQL storage provider."
-date: 2022-06-15T17:51:47+10:00
+date: 2024-03-14T06:00:14+11:00
 draft: false
 images: []
 weight: 107400
@@ -55,9 +55,9 @@ storage:
         ...
         -----END CERTIFICATE-----
       private_key: |
-        -----BEGIN RSA PRIVATE KEY-----
+        -----BEGIN PRIVATE KEY-----
         ...
-        -----END RSA PRIVATE KEY-----
+        -----END PRIVATE KEY-----
 ```
 
 ## Options

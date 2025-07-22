@@ -2,7 +2,7 @@
 title: "NGINX"
 description: "An integration guide for Authelia and the NGINX reverse proxy"
 summary: "A guide on integrating Authelia with the nginx reverse proxy."
-date: 2022-06-15T17:51:47+10:00
+date: 2024-03-14T06:00:14+11:00
 draft: false
 images: []
 weight: 350
@@ -150,7 +150,7 @@ services:
     networks:
       net:
         aliases:
-          - 'https://{{</* sitevar name="subdomain-authelia" nojs="auth" */>}}.{{</* sitevar name="domain" nojs="example.com" */>}}'
+          - '{{< sitevar name="subdomain-authelia" nojs="auth" >}}.{{< sitevar name="domain" nojs="example.com" >}}'
     ports:
       - '80:80/tcp'
       - '443:443/tcp'
@@ -694,6 +694,11 @@ proxy_set_header Remote-Email $email;
 ## If the subreqest returns 200 pass to the backend, if the subrequest returns 401 redirect to the portal.
 error_page 401 =302 /internal/authelia/authz/detect?rd=$target_url;
 ```
+
+## Kubernetes
+
+Authelia supports some of the [NGINX] based Kubernetes Ingress. See the
+[Kubernetes Integration Guide](../kubernetes/nginx-ingress.md) for more information.
 
 ## See Also
 

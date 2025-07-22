@@ -31,7 +31,7 @@ const (
 	ClaimExpirationTime                      = "exp"
 	ClaimAuthenticationTime                  = "auth_time"
 	ClaimIssuer                              = valueIss
-	ClaimNonce                               = "nonce"
+	ClaimNonce                               = valueNonce
 	ClaimAudience                            = "aud"
 	ClaimGroups                              = "groups"
 	ClaimAuthorizedParty                     = "azp"
@@ -154,6 +154,7 @@ const (
 )
 
 const (
+	EncryptionAlgNone             = "none"
 	EncryptionAlgRSA15            = "RSA1_5"
 	EncryptionAlgRSAOAEP          = "RSA-OAEP"
 	EncryptionAlgRSAOAEP256       = "RSA-OAEP-256"
@@ -219,10 +220,12 @@ const (
 	FormParameterResponseMode = "response_mode"
 	FormParameterResponseType = "response_type"
 	FormParameterScope        = valueScope
-	FormParameterIssuer       = valueIss
 	FormParameterPrompt       = "prompt"
 	FormParameterMaximumAge   = "max_age"
 	FormParameterClaims       = "claims"
+	FormParameterUserCode     = "user_code"
+	FormParameterFlowID       = "flow_id"
+	FormParameterNonce        = valueNonce
 )
 
 const (
@@ -256,6 +259,7 @@ const (
 
 // Endpoints.
 const (
+	EndpointConsent                    = "consent"
 	EndpointAuthorization              = "authorization"
 	EndpointDeviceAuthorization        = "device-authorization"
 	EndpointToken                      = "token"
@@ -267,11 +271,11 @@ const (
 
 // Paths.
 const (
-	EndpointPathConsent         = "/consent/openid"
-	EndpointPathConsentDecision = EndpointPathConsent + "/decision"
-	EndpointPathConsentLogin    = EndpointPathConsent + "/login"
+	FrontendEndpointPathConsentCompletion = "/consent/completion"
 
-	EndpointPathRFC8628UserVerificationURL = EndpointPathConsent + "/" + EndpointDeviceAuthorization
+	FrontendEndpointPathConsent                    = "/consent/openid"
+	FrontendEndpointPathConsentDecision            = FrontendEndpointPathConsent + "/decision"
+	FrontendEndpointPathConsentDeviceAuthorization = FrontendEndpointPathConsent + "/" + EndpointDeviceAuthorization
 
 	EndpointPathWellKnownOpenIDConfiguration      = "/.well-known/openid-configuration"
 	EndpointPathWellKnownOAuthAuthorizationServer = "/.well-known/oauth-authorization-server"
@@ -279,6 +283,7 @@ const (
 
 	EndpointPathRoot = "/api/oidc"
 
+	EndpointPathConsent                    = EndpointPathRoot + "/" + EndpointConsent
 	EndpointPathAuthorization              = EndpointPathRoot + "/" + EndpointAuthorization
 	EndpointPathToken                      = EndpointPathRoot + "/" + EndpointToken
 	EndpointPathUserinfo                   = EndpointPathRoot + "/" + EndpointUserinfo
@@ -404,6 +409,7 @@ const (
 	valueNone          = "none"
 	valueRefreshToken  = "refresh_token"
 	valueIss           = "iss"
+	valueNonce         = "nonce"
 )
 
 const (
