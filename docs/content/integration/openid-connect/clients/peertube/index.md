@@ -14,7 +14,7 @@ support:
   versions: true
   integration: true
 seo:
-  title: "" # custom title (optional)
+  title: "PeerTube | OpenID Connect 1.0 | Integration"
   description: "Step-by-step guide to configuring PeerTube with OpenID Connect 1.0 for secure SSO. Enhance your login flow using Authelia’s modern identity management."
   canonical: "" # custom canonical URL (optional)
   noindex: false # false (default) or true
@@ -23,9 +23,11 @@ seo:
 ## Tested Versions
 
 - [Authelia]
-  - [v4.38.18](https://github.com/authelia/authelia/releases/tag/v4.38.18)
+  - [v4.39.4](https://github.com/authelia/authelia/releases/tag/v4.39.4)
 - [PeerTube]
-  - [v7.0.1](https://github.com/Chocobozzz/PeerTube/releases/tag/v7.0.1)
+  - [v7.2.1](https://github.com/Chocobozzz/PeerTube/releases/tag/v7.2.1)
+- [OpenID Connect Plugin]
+  - v1.0.2
 
 {{% oidc-common %}}
 
@@ -85,7 +87,7 @@ identity_providers:
           - 'authorization_code'
         access_token_signed_response_alg: 'none'
         userinfo_signed_response_alg: 'none'
-        token_endpoint_auth_method: 'client_secret_basic'
+        token_endpoint_auth_method: 'client_secret_post'
 ```
 
 ### Application
@@ -128,5 +130,5 @@ To configure [PeerTube] to utilize Authelia as an [OpenID Connect 1.0] Provider,
 [PeerTube]: https://joinpeertube.org
 [OpenID Connect Plugin]: https://framagit.org/framasoft/peertube/official-plugins/-/tree/master/peertube-plugin-auth-openid-connect
 [Authelia]: https://www.authelia.com
-[OpenID Connect 1.0]: ../../openid-connect/introduction.md
-[client configuration]: ../../../configuration/identity-providers/openid-connect/clients.md
+[OpenID Connect 1.0]: ../../introduction.md
+[client configuration]: ../../../../configuration/identity-providers/openid-connect/clients.md

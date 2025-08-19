@@ -14,7 +14,7 @@ support:
   versions: true
   integration: true
 seo:
-  title: "" # custom title (optional)
+  title: "Seafile | OpenID Connect 1.0 | Integration"
   description: "Step-by-step guide to configuring Seafile with OpenID Connect 1.0 for secure SSO. Enhance your login flow using Authelia’s modern identity management."
   canonical: "" # custom canonical URL (optional)
   noindex: false # false (default) or true
@@ -113,14 +113,22 @@ OAUTH_SCOPE = [
     "email",
 ]
 OAUTH_ATTRIBUTE_MAP = {
-    "email": (True, "email"),
+    "sub": (True, "uid"),
+    "email": (False, "email"),
     "name": (False, "name"),
-    "id": (False, "not used"),
 }
 
 # Optional
 #ENABLE_WEBDAV_SECRET = True
 ```
+
+### Existing Users
+
+When using [Seafile] with external authentication you may have to perform manual steps to achieve this. 
+
+The [See Also](#see-also) has a link to the [Seafile] `migrating from local user database to external authentication` guide which has been verified to work.  
+
+
 
 ## Additional Steps
 
@@ -132,9 +140,10 @@ basic auth.
 
 - [Seafile OAuth Authentication Documentation](https://manual.seafile.com/latest/config/oauth/)
 - [Seafile's WebDAV extension](https://manual.seafile.com/latest/extension/webdav/)
+- [Migrate from local user database to OAuth](https://manual.seafile.com/11.0/deploy/auth_switch/#migrating-from-local-user-database-to-external-authentication)
 
 [Authelia]: https://www.authelia.com
 [Seafile]: https://www.seafile.com/
 [Seafile's WebDAV extension]: https://manual.seafile.com/extension/webdav/
-[OpenID Connect 1.0]: ../../openid-connect/introduction.md
-[client configuration]: ../../../configuration/identity-providers/openid-connect/clients.md
+[OpenID Connect 1.0]: ../../introduction.md
+[client configuration]: ../../../../configuration/identity-providers/openid-connect/clients.md

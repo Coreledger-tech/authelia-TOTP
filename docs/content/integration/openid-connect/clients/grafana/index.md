@@ -14,7 +14,7 @@ support:
   versions: true
   integration: true
 seo:
-  title: "" # custom title (optional)
+  title: "Grafana | OpenID Connect 1.0 | Integration"
   description: "Step-by-step guide to configuring Grafana with OpenID Connect 1.0 for secure SSO. Enhance your login flow using Authelia’s modern identity management."
   canonical: "" # custom canonical URL (optional)
   noindex: false # false (default) or true
@@ -23,9 +23,9 @@ seo:
 ## Tested Versions
 
 - [Authelia]
-  - [v4.38.17](https://github.com/authelia/authelia/releases/tag/v4.38.17)
+  - [v4.39.6](https://github.com/authelia/authelia/releases/tag/v4.39.6)
 - [Grafana]
-  - [v11.4.0](https://github.com/grafana/grafana/releases/tag/v11.4.0)
+  - [v12.0.2](https://github.com/grafana/grafana/releases/tag/v12.0.2)
 
 {{% oidc-common bugs="claims-hydration" %}}
 
@@ -45,12 +45,6 @@ Some of the values presented in this guide can automatically be replaced with do
 ## Configuration
 
 ### Authelia
-
-{{< callout context="caution" title="Important Note" icon="outline/alert-triangle" >}}
-At the time of this writing this third party client has a bug and does not support [OpenID Connect 1.0](https://openid.net/specs/openid-connect-core-1_0.html). This
-configuration will likely require configuration of an escape hatch to work around the bug on their end. See
-[Configuration Escape Hatch](#configuration-escape-hatch) for details.
-{{< /callout >}}
 
 The following YAML configuration is an example __Authelia__ [client configuration] for use with [Grafana] which will
 operate with the application example:
